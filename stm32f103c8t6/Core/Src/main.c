@@ -28,6 +28,8 @@
 /* USER CODE BEGIN Includes */
 
 #include "OLED.h"
+#include "MOTOR.h"
+#include "KEY.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -99,6 +101,12 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   OLED_Clear();
+  MOTOR_Init();
+
+  MOTOR_SetFreq(1,100);
+  MOTOR_SetEn(1,1);
+
+  uint8_t KeyNum = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -106,10 +114,16 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
     /* USER CODE BEGIN 3 */
- 
-    OLED_ShowNum(1,1,48,2);
+    KeyNum= KEY_GetNum();
+		if (KeyNum == 1)
+		{
+      MOTOR_SetEn(1,1);
+		}
+		if (KeyNum == 2)
+		{
+      MOTOR_SetEn(1,0);
+		}
 
     
   }

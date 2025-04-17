@@ -545,6 +545,11 @@
               <FileType>1</FileType>
               <FilePath>..\Hardware\Src\MOTOR.c</FilePath>
             </File>
+            <File>
+              <FileName>KEY.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Hardware\Src\KEY.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
