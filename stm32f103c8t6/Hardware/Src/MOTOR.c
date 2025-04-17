@@ -146,4 +146,10 @@ void MOTOR_SetFreq(int MOTOR, int Freq)
     MOTOR_InitTool();
 }
 
+void MOTOR_Move(int MOTOR, int Step)
+{
+    if (MOTOR == 1)
+    {
 
+    }
+}

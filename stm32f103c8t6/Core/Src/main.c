@@ -50,7 +50,10 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+uint8_t rx_data;
 
+uint16_t x = 0;
+uint16_t y = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -61,7 +64,48 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) 
+{
+  static uint8_t tmp_data;  //临时存储
+  
+  if (huart->Instance == USART1)
+  {
+    tmp_data = rx_data;  //获取数据
+    
+    switch(uart1_rx_state) 
+    {
+      case 0:
+        if(tmp_data == 0xff) 
+        {
+          uart1_rx_state = 1;
+          uart1_rx_length = 0;
+          uart1_rx_flag = 0;
+        }
+        break;
+        
+      case 1:  //接收数据体
+        if(tmp_data == 0xfe) 
+        {
+          uart1_rx_state = 0;
+          uart1_rx_buffer[uart1_rx_length] = '\0';
+          uart1_rx_flag = 1;
 
+          x = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
+          y = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
+        } 
+        else 
+        {
+          if(uart1_rx_length < RX_BUFFER_SIZE-1) 
+          { 
+            uart1_rx_buffer[uart1_rx_length++] = tmp_data;
+          }
+        }
+        break;
+    }
+
+    HAL_UART_Receive_IT(&huart1, &rx_data, 1);
+  }
+}
 /* USER CODE END 0 */
 
 /**
@@ -100,13 +144,16 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  OLED_Clear();
+  OLED_Init();
   MOTOR_Init();
-
-  MOTOR_SetFreq(1,100);
-  MOTOR_SetEn(1,1);
+  HAL_UART_Receive_IT(&huart1, &rx_data, 1);
+  // MOTOR_SetFreq(1,100);
+  // MOTOR_SetEn(1,1);
 
   uint8_t KeyNum = 0;
+
+  OLED_ShowString(1,1,"x:");
+  OLED_ShowString(2,1,"y:");
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -116,16 +163,15 @@ int main(void)
     /* USER CODE END WHILE */
     /* USER CODE BEGIN 3 */
     KeyNum= KEY_GetNum();
+    OLED_ShowNum(1,3,x,5);
+    OLED_ShowNum(2,3,y,5);
 		if (KeyNum == 1)
 		{
-      MOTOR_SetEn(1,1);
 		}
 		if (KeyNum == 2)
 		{
-      MOTOR_SetEn(1,0);
 		}
 
-    
   }
   /* USER CODE END 3 */
 }

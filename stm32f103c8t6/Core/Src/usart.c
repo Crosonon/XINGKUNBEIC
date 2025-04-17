@@ -21,7 +21,10 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
-
+volatile uint8_t uart1_rx_flag = 0;  //接收完成标志
+char uart1_rx_buffer[RX_BUFFER_SIZE] = {0};  //接收缓冲区
+uint8_t uart1_rx_length = 0;        //当前接收长度
+uint8_t uart1_rx_state = 0;         //状态机状态
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart1;

@@ -29,7 +29,12 @@ extern "C" {
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
+#define RX_BUFFER_SIZE 100
 
+extern volatile uint8_t uart1_rx_flag;
+extern char uart1_rx_buffer[RX_BUFFER_SIZE];
+extern uint8_t uart1_rx_length;
+extern uint8_t uart1_rx_state;
 /* USER CODE END Includes */
 
 extern UART_HandleTypeDef huart1;
