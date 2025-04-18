@@ -550,6 +550,11 @@
               <FileType>1</FileType>
               <FilePath>..\Hardware\Src\KEY.c</FilePath>
             </File>
+            <File>
+              <FileName>MENU.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Hardware\Src\MENU.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

@@ -79,24 +79,46 @@ void KEY_Act(uint8_t Key_Num)
     }
 }
 
-//下面需要改动的
-void Key_Act1(void)
+//
+/*
+k1松开/开启电机
+
+
+k2设置模式/确定：
+k3下一条
+k4下一页
+
+二层菜单内容
+录入点
+回到原点
+沿着边线
+跟着a4纸
+
+录入点内容
+右上
+左上
+左下
+右下
+
+开关激光
+*/
+__weak void Key_Act1(void)
 {
 
 }
-void Key_Act2(void)
+__weak void Key_Act2(void)
 {
 
 }
-void Key_Act3(void)
+__weak void Key_Act3(void)
 {
 
 }
-void Key_Act4(void)
+__weak void Key_Act4(void)
 {
 
 }
-void Key_Act5(void)
+__weak void Key_Act5(void)
 {
 
 }
