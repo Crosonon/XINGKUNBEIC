@@ -91,7 +91,12 @@ void Error_Handler(void);
 #define Key1_GPIO_Port GPIOB
 #define Key2_Pin GPIO_PIN_9
 #define Key2_GPIO_Port GPIOB
-
+#define Key3_Pin GPIO_PIN_10
+#define Key3_GPIO_Port GPIOA
+#define Key4_Pin GPIO_PIN_11
+#define Key4_GPIO_Port GPIOA
+#define Key5_Pin GPIO_PIN_12
+#define Key5_GPIO_Port GPIOA
 //定义b14和b15为output
 #define Motor_1L_Step_Pin GPIO_PIN_8
 #define Motor_1L_Step_GPIO_Port GPIOA

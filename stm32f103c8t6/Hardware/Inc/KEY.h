@@ -9,5 +9,8 @@ void KEY_Act(uint8_t Key_Num);
 
 void Key_Act1(void);
 void Key_Act2(void);
+void Key_Act3(void);
+void Key_Act4(void);
+void Key_Act5(void);
 
 #endif

@@ -118,6 +118,10 @@ void HAL_TIM_RxCpltCallback(TIM_HandleTypeDef *htim)
   if (htim -> Instance == TIM1)
   {
     //10ms触发一次
+    //更新x和y
+    x_Del = x_Set - x_Now;
+    y_Del = y_Set - y_Now;
+
 
   }
 }
@@ -180,7 +184,7 @@ int main(void)
     // OLED_ShowNum(2,3,y_Now,5);
 		if (KeyNum == 1)
 		{
-      MOTOR_MoveDist(1, x_Set);
+      MOTOR_MoveDist(1, x_Del);
       x_Set = 0;
 		}
 		if (KeyNum == 2)

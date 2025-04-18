@@ -1,3 +1,4 @@
+#include "math.h"
 #include "MOTOR.h"
 #include "gpio.h"
 #include "tim.h"
@@ -66,6 +67,11 @@ void MOTOR_InitTool(void)
     Pin = 0x0000;
 }
 
+float MOTOR_K(float dis_cm)
+{
+    return pow(((pow(dis_cm, 2) + (10000) )/ 10000), 0.5);
+}
+
 void MOTOR_SetEn(uint8_t MOTOR, uint8_t MOTOR_En)
 {
     Tool = En;
@@ -106,7 +112,7 @@ void MOTOR_MoveDist(uint8_t MOTOR, float MOTOR_Distance_cm)
 {
     //步数 = 运动距离 / 步距，步距 = 间距1000mm * 步距角，步距角 = 3.14 / 100 / 细分
     //步数 = dis / (3.14 / 16) = dis / 0.196
-    uint8_t MOTOR_Step = MOTOR_Distance_cm / 0.196;
+    uint8_t MOTOR_Step = MOTOR_Distance_cm * MOTOR_K(0) / 0.196;
     MOTOR_MoveStep(MOTOR, MOTOR_Step);
 }
 
