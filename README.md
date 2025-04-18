@@ -67,4 +67,4 @@
 | K210     | a2      | tx                |          | a5                  |
 | OLED     | b10     | scl               | 预留蓝牙 | b7  rx1（接蓝牙tx） |
 | OLED     | b11     | sda               | 预留蓝牙 | b6                  |
-| adc      | b1      | 电压检测（adc9）  | 其他预留 | b5 b7 a1            |
+| adc      | b1      | 电压检测（adc9）  | 遥感     | b0 a1               |
