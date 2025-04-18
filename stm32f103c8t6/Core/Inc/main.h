@@ -79,16 +79,24 @@ void Error_Handler(void);
 #define Motor_1L_Dir_GPIO_Port GPIOB
 #define Motor_2H_Dir_Pin GPIO_PIN_15
 #define Motor_2H_Dir_GPIO_Port GPIOB
-#define Motor1_PWM_Pin GPIO_PIN_8
-#define Motor1_PWM_GPIO_Port GPIOA
-#define Motor2_PWM_Pin GPIO_PIN_9
-#define Motor2_PWM_GPIO_Port GPIOA
+/* 
+// #define Motor1_PWM_Pin GPIO_PIN_8
+// #define Motor1_PWM_GPIO_Port GPIOA
+// #define Motor2_PWM_Pin GPIO_PIN_9
+// #define Motor2_PWM_GPIO_Port GPIOA
+*/
 #define Laser_Pin GPIO_PIN_3
 #define Laser_GPIO_Port GPIOB
 #define Key1_Pin GPIO_PIN_8
 #define Key1_GPIO_Port GPIOB
 #define Key2_Pin GPIO_PIN_9
 #define Key2_GPIO_Port GPIOB
+
+//定义b14和b15为output
+#define Motor_1L_Step_Pin GPIO_PIN_8
+#define Motor_1L_Step_GPIO_Port GPIOA
+#define Motor_2H_Step_Pin GPIO_PIN_9
+#define Motor_2H_Step_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
 

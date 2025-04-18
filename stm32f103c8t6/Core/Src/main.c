@@ -52,8 +52,12 @@
 /* USER CODE BEGIN PV */
 uint8_t rx_data;
 
-uint16_t x = 0;
-uint16_t y = 0;
+uint16_t x_Now = 0;
+uint16_t y_Now = 0;
+uint16_t x_Set = 0;
+uint16_t y_Set = 0;
+uint16_t x_Del = 0;
+uint16_t y_Del = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -64,6 +68,7 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+//uart1回调，收集k210给的数据，存储到x和y
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) 
 {
   static uint8_t tmp_data;  //临时存储
@@ -90,8 +95,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
           uart1_rx_buffer[uart1_rx_length] = '\0';
           uart1_rx_flag = 1;
 
-          x = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
-          y = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
+          x_Now = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
+          y_Now = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
         } 
         else 
         {
@@ -104,6 +109,16 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     }
 
     HAL_UART_Receive_IT(&huart1, &rx_data, 1);
+  }
+}
+
+//tim1回调，10ms触发一次，设定电机转动
+void HAL_TIM_RxCpltCallback(TIM_HandleTypeDef *htim)
+{
+  if (htim -> Instance == TIM1)
+  {
+    //10ms触发一次
+
   }
 }
 /* USER CODE END 0 */
@@ -147,8 +162,6 @@ int main(void)
   OLED_Init();
   MOTOR_Init();
   HAL_UART_Receive_IT(&huart1, &rx_data, 1);
-  // MOTOR_SetFreq(1,100);
-  // MOTOR_SetEn(1,1);
 
   uint8_t KeyNum = 0;
 
@@ -163,13 +176,16 @@ int main(void)
     /* USER CODE END WHILE */
     /* USER CODE BEGIN 3 */
     KeyNum= KEY_GetNum();
-    OLED_ShowNum(1,3,x,5);
-    OLED_ShowNum(2,3,y,5);
+    OLED_ShowNum(1,3,x_Set,5);
+    // OLED_ShowNum(2,3,y_Now,5);
 		if (KeyNum == 1)
 		{
+      MOTOR_MoveDist(1, x_Set);
+      x_Set = 0;
 		}
 		if (KeyNum == 2)
 		{
+      x_Set += 1;
 		}
 
   }

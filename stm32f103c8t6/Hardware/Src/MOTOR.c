@@ -1,17 +1,17 @@
 #include "MOTOR.h"
+#include "gpio.h"
 #include "tim.h"
 
 #define Motor_En_GPIO_Port GPIOB
 #define Motor_Dir_GPIO_Port GPIOB
-#define Motor_Pwm_GPIO_Port GPIOA
+#define Motor_Step_GPIO_Port GPIOA
 
 #define En 1
 #define Dir 2
-#define Pwm 3
+#define Step 3
 
 uint8_t Tool = 0;
 uint16_t Pin = 0x0000;
-uint16_t Channel = 0x00000000U;
 
 void MOTOR_Init(void)
 {
@@ -44,15 +44,15 @@ uint8_t MOTOR_SetPin(uint8_t MOTOR)
         }
         return 2;
     }
-    if (Tool == Pwm)
+    if (Tool == Step)
     {
         if (MOTOR == 1 | MOTOR == 3)
         {
-            Pin = Pin | Motor1_PWM_Pin;
+            Pin = Pin | Motor_1L_Step_Pin;
         }
         if (MOTOR == 2 | MOTOR == 3)
         {
-            Pin = Pin | Motor2_PWM_Pin;
+            Pin = Pin | Motor_2H_Step_Pin;
         }
         return 3;
     }
@@ -60,36 +60,13 @@ uint8_t MOTOR_SetPin(uint8_t MOTOR)
     return 0;
 }
 
-uint8_t MOTOR_SetChannel(uint8_t MOTOR)
-{
-    if (Tool == Pwm)
-    {
-        if (MOTOR == 1)
-        {
-            Channel = TIM_CHANNEL_1;
-        }
-        else if (MOTOR == 2)
-        {
-            Channel = TIM_CHANNEL_2;
-        }
-        else if (MOTOR == 3)
-        {
-            Channel = TIM_CHANNEL_ALL;
-        }
-        return 1;
-    }
-    //setchannel报错
-    return 0;
-}
-
 void MOTOR_InitTool(void)
 {
     Tool = 0;
     Pin = 0x0000;
-    Channel = 0x00000000U;
 }
 
-void MOTOR_SetEn(int MOTOR, int MOTOR_En)
+void MOTOR_SetEn(uint8_t MOTOR, uint8_t MOTOR_En)
 {
     Tool = En;
     if (MOTOR_SetPin(MOTOR))
@@ -99,7 +76,7 @@ void MOTOR_SetEn(int MOTOR, int MOTOR_En)
     MOTOR_InitTool();
 }
 
-void MOTOR_SetDir(int MOTOR, int MOTOR_Dir)
+void MOTOR_SetDir(uint8_t MOTOR, uint8_t MOTOR_Dir)
 {
     Tool = Dir;
     if (MOTOR_SetPin(MOTOR))
@@ -109,47 +86,88 @@ void MOTOR_SetDir(int MOTOR, int MOTOR_Dir)
     MOTOR_InitTool();
 }
 
-//由于单个tim不能设置多个频率，这里两个电机实际上一致
-void MOTOR_SetFreq(int MOTOR, int Freq)
+void MOTOR_MoveStep(uint8_t MOTOR, uint8_t MOTOR_Step)
 {
-    Tool = Pwm;
-
-    //设定通道
-    if (MOTOR_SetChannel(MOTOR))
+    MOTOR_Step = (MOTOR_Step < 8) ? MOTOR_Step : 8;
+    Tool = Step;
+    if (MOTOR_SetPin(MOTOR))
     {
-        //0频率关闭
-        if (Freq == 0)
+        for (uint16_t i = 0; i < MOTOR_Step; i ++)
         {
-            HAL_TIM_PWM_Stop(&htim1, Channel);
-            MOTOR_InitTool();
-            return;
-        }
-
-        //限幅1-100
-        Freq = (Freq < 1) ? 1 : (Freq > 100) ? 100 : Freq;
-
-        //arr计算
-        uint32_t arr = (1000000 / Freq) - 1;
-
-        //arr设置频率
-        __HAL_TIM_SET_AUTORELOAD(&htim1, arr);
-        __HAL_TIM_SET_COMPARE(&htim1, Channel, arr / 2);
-
-        //没开就打开
-        if (HAL_TIM_PWM_GetState(&htim1) != HAL_TIM_STATE_BUSY)
-        {
-            HAL_TIM_PWM_Start(&htim1, Channel);
+            HAL_GPIO_WritePin(Motor_Step_GPIO_Port, Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(Motor_Step_GPIO_Port, Pin, GPIO_PIN_RESET);
+            HAL_Delay(1);
         }
     }
-
-    //重置工具
     MOTOR_InitTool();
 }
 
-void MOTOR_Move(int MOTOR, int Step)
+void MOTOR_MoveDist(uint8_t MOTOR, float MOTOR_Distance_cm)
 {
-    if (MOTOR == 1)
-    {
-
-    }
+    //步数 = 运动距离 / 步距，步距 = 间距1000mm * 步距角，步距角 = 3.14 / 100 / 细分
+    //步数 = dis / (3.14 / 16) = dis / 0.196
+    uint8_t MOTOR_Step = MOTOR_Distance_cm / 0.196;
+    MOTOR_MoveStep(MOTOR, MOTOR_Step);
 }
+
+/*曾经的pwm代码
+// void MOTOR_SetFreq(int MOTOR, int Freq)
+// {
+//     Tool = Pwm;
+
+//     //设定通道
+//     if (MOTOR_SetChannel(MOTOR))
+//     {
+//         //0频率关闭
+//         if (Freq == 0)
+//         {
+//             HAL_TIM_PWM_Stop(&htim1, Channel);
+//             MOTOR_InitTool();
+//             return;
+//         }
+
+//         //限幅1-100
+//         Freq = (Freq < 1) ? 1 : (Freq > 100) ? 100 : Freq;
+
+//         //arr计算
+//         uint32_t arr = (1000000 / Freq) - 1;
+
+//         //arr设置频率
+//         __HAL_TIM_SET_AUTORELOAD(&htim1, arr);
+//         __HAL_TIM_SET_COMPARE(&htim1, Channel, arr / 2);
+
+//         //没开就打开
+//         if (HAL_TIM_PWM_GetState(&htim1) != HAL_TIM_STATE_BUSY)
+//         {
+//             HAL_TIM_PWM_Start(&htim1, Channel);
+//         }
+//     }
+
+//     //重置工具
+//     MOTOR_InitTool();
+// }
+*/
+
+/*曾经的通道设置代码
+// uint8_t MOTOR_SetChannel(uint8_t MOTOR)
+// {
+//     if (Tool == Pwm)
+//     {
+//         if (MOTOR == 1)
+//         {
+//             Channel = TIM_CHANNEL_1;
+//         }
+//         else if (MOTOR == 2)
+//         {
+//             Channel = TIM_CHANNEL_2;
+//         }
+//         else if (MOTOR == 3)
+//         {
+//             Channel = TIM_CHANNEL_ALL;
+//         }
+//         return 1;
+//     }
+//     //setchannel报错
+//     return 0;
+// }
+*/
