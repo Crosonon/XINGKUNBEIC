@@ -103,7 +103,18 @@ void Error_Handler(void);
 #define Key2_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-
+extern uint8_t KeyNum;
+extern uint8_t rx_data;
+extern uint16_t x_Now;
+extern uint16_t y_Now;
+extern uint16_t x_Set;
+extern uint16_t y_Set;
+extern uint16_t x_Del;
+extern uint16_t y_Del;
+extern uint32_t adcData[3];
+extern float JoyxCH0;
+extern float JoyyCH1;
+extern float VoltCH2;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

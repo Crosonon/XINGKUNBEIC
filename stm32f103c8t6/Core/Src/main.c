@@ -19,7 +19,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "adc.h"
-#include "dma.h"
 #include "i2c.h"
 #include "tim.h"
 #include "usart.h"
@@ -65,9 +64,11 @@ uint16_t x_Del = 0;
 uint16_t y_Del = 0;
 
 uint32_t adcData[3];
-float Joy1CH0;
-float Joy2CH1;
+float JoyxCH0;
+float JoyyCH1;
 float VoltCH2;
+
+uint16_t tim_i = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -98,15 +99,36 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
         }
         break;
         
-      case 1:  //接收数据体
-        if(tmp_data == 0xfe) 
+      case 1:
+        if(tmp_data == 0x00)
+        {
+          uart1_rx_state = 2;
+          uart1_rx_mode = 0;
+        }
+        else if (tmp_data == 0x01)
+        {
+          uart1_rx_state = 2;
+          uart1_rx_mode = 1;
+        }
+        break;
+
+      case 2:  //接收数据体
+        if(tmp_data == 0xfe) //end
         {
           uart1_rx_state = 0;
           uart1_rx_buffer[uart1_rx_length] = '\0';
           uart1_rx_flag = 1;
-          
-          x_Now = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
-          y_Now = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
+          if (uart1_rx_mode == 0)//写入xynow
+          {
+            x_Now = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
+            y_Now = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
+          }
+          else if (uart1_rx_mode == 1)//写入xyset
+          {
+            x_Set = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
+            y_Set = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
+          }
+          uart1_rx_mode = 0;
         } 
         else 
         {
@@ -132,9 +154,33 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     x_Del = x_Set - x_Now;
     y_Del = y_Set - y_Now;
 
-    Joy1CH0 = adcData[0] * (3.3 / 4096);
-    Joy2CH1 = adcData[1] * (3.3 / 4096);
-    VoltCH2 = adcData[2] * (3.3 / 4096);
+    if(JoyxCH0 < 1) MOTOR_MoveRight(0.2);
+    if(JoyxCH0 > 3) MOTOR_MoveLeft(0.2);
+    if(JoyyCH1 < 1) MOTOR_MoveDown(0.2);
+    if(JoyyCH1 > 3) MOTOR_MoveUp(0.2);
+    
+    tim_i += 1;
+    if(tim_i == 10)
+    {
+      tim_i = 0;
+      {
+        for (uint8_t i = 0; i < 3; i++)
+        {
+          HAL_ADC_Start(&hadc1);
+          HAL_ADC_PollForConversion(&hadc1, 50);
+          adcData[i] = HAL_ADC_GetValue(&hadc1);
+        }
+        HAL_ADC_Stop(&hadc1);
+        // HAL_Delay(500);
+        JoyxCH0 = adcData[0] * (3.3 / 4096);
+        JoyyCH1 = adcData[1] * (3.3 / 4096);
+        VoltCH2 = adcData[2] * (3.3 / 4096);
+        OLED_ShowFloat(1,1,JoyxCH0);
+        OLED_ShowFloat(2,1,JoyyCH1);
+        OLED_ShowFloat(3,1,VoltCH2);
+      }
+    }
+
   }
 }
 /* USER CODE END 0 */
@@ -168,7 +214,6 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_DMA_Init();
   MX_ADC1_Init();
   MX_TIM1_Init();
   MX_I2C2_Init();
@@ -176,14 +221,15 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  HAL_ADC_Start_DMA(&hadc1, adcData, 3);
+  // HAL_ADC_Start_DMA(&hadc1, adcData, 3);
+  HAL_ADCEx_Calibration_Start(&hadc1);
   OLED_Init();
   HAL_TIM_Base_Start_IT(&htim1);
   MOTOR_Init();
   HAL_UART_Receive_IT(&huart1, &rx_data, 1);
 
   /* USER CODE END 2 */
-  
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -192,11 +238,9 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     KEY_Act(KEY_GetNum());
-    OLED_Clear();
-    OLED_ShowFloat(1,1,Joy1CH0);
-    OLED_ShowFloat(2,1,Joy2CH1);
-    OLED_ShowFloat(3,1,VoltCH2);
-    HAL_Delay(1000);
+
+
+    HAL_Delay(20);
   }
   /* USER CODE END 3 */
 }
