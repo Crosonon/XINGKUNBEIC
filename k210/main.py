@@ -1,6 +1,7 @@
 import sensor, image, time, math, lcd
 from machine import UART
 from fpioa_manager import fm
+from modules import ybkey
 
 # 硬件初始化
 fm.register(8, fm.fpioa.UART2_TX, force=True)
@@ -13,24 +14,26 @@ red_laser_thresholds = (60, 100, 40, 127, -128, 127)
 sensor.reset()
 sensor.set_pixformat(sensor.RGB565)
 sensor.set_framesize(sensor.QVGA)
-sensor.set_hmirror(True)
+sensor.set_hmirror(False)
 sensor.skip_frames(time=2000)
 sensor.set_auto_gain(False)
 sensor.set_auto_whitebal(False)
 
 lcd.init()
 
-def pack_data(x, y):
+KEY = ybkey()
+points=[]
+
+#flag:0x00表示发送当前红斑位置,0x01表示发送的是记录的角的位置
+def pack_data(data, flag):
     header = 0xFF
     footer = 0xFE
-    return bytearray([
-        header,
-        (x >> 8) & 0xFF,  # X高字节
-        x & 0xFF,          # X低字节
-        (y >> 8) & 0xFF,  # Y高字节
-        y & 0xFF,          # Y低字节
-        footer
-    ])
+    buffer = bytearray([header, flag])
+    for i in data:
+        buffer.append((i >> 8) & 0xFF) #高字节
+        buffer.append(i & 0xFF)        #低字节
+    buffer.append(footer)
+    return buffer
 
 while(True):
     img = sensor.snapshot()
@@ -53,7 +56,7 @@ while(True):
 
         # 串口发送数据（每次检测到都发送）
         try:
-            data_packet = pack_data(largest_blob.cx(), largest_blob.cy())
+            data_packet = pack_data([largest_blob.cx(), largest_blob.cy()], 0x00)
             uart.write(data_packet)
             print("Sent:", data_packet)  # 调试输出
             print(
@@ -62,5 +65,17 @@ while(True):
             )
         except Exception as e:
             print("UART Error:", e)
+
+        if (KEY.is_press() and len(points) < 4):
+            try:
+                points.append((largest_blob.cx(), largest_blob.cy()))
+                data_packet = pack_data([largest_blob.cx(), largest_blob.cy()], 0x01)
+                uart.write(data_packet)
+                print("Sent:", data_packet)  # 调试输出
+                time.sleep_ms(100)
+            except Exception as e:
+                print("UART Error:", e)
+
+        print(points)
 
     lcd.display(img)
