@@ -171,8 +171,6 @@ int main(void)
 
   uint8_t KeyNum = 0;
 
-  OLED_ShowString(1,1,"x:");
-  OLED_ShowString(2,1,"y:");
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -181,19 +179,9 @@ int main(void)
   {
   
     /* USER CODE END WHILE */
+
     /* USER CODE BEGIN 3 */
     KEY_Act(KEY_GetNum());
-    OLED_ShowNum(1,3,x_Set,5);
-    // OLED_ShowNum(2,3,y_Now,5);
-		if (KeyNum == 1)
-		{
-      MOTOR_MoveDist(1, x_Del);
-      x_Set = 0;
-		}
-		if (KeyNum == 2)
-		{
-      x_Set += 1;
-		}
 
   }
   /* USER CODE END 3 */

@@ -1,5 +1,6 @@
 #include "MENU.h"
 #include "OLED.h"
+#include "adc.h"
 
 uint8_t MENU_Cursor = 1;
 uint8_t MENU_Page = 1;
@@ -54,7 +55,7 @@ void MENU_PageShow(void)
     if (MENU_Page == 1)
     {
         OLED_ShowNum(1,7,1,1);//电机状态，1or0
-        OLED_ShowFloat(2,7,12.0);//电压
+        OLED_ShowFloat(2,7,((float)HAL_ADC_GetValue(&hadc1) / 4096 *3.3));//电压
 
     }
     if (MENU_Page == 2)

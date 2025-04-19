@@ -67,6 +67,10 @@ void MOTOR_InitTool(void)
     Pin = 0x0000;
 }
 
+/**
+ * @brief 计算边缘误差，不需要给0即可
+ * @param dis_cm 输入此时激光点与垂足的距离
+**/
 float MOTOR_K(float dis_cm)
 {
     return pow(((pow(dis_cm, 2) + (10000) )/ 10000), 0.5);
@@ -110,10 +114,36 @@ void MOTOR_MoveStep(uint8_t MOTOR, uint8_t MOTOR_Step)
 
 void MOTOR_MoveDist(uint8_t MOTOR, float MOTOR_Distance_cm)
 {
+    uint8_t MOTOR_Dir;
+    if (MOTOR_Distance_cm > 0) MOTOR_Dir = 0;
+    if (MOTOR_Distance_cm < 0) MOTOR_Dir = 1;
+    MOTOR_SetDir(MOTOR, MOTOR_Dir);
+
     //步数 = 运动距离 / 步距，步距 = 间距1000mm * 步距角，步距角 = 3.14 / 100 / 细分
     //步数 = dis / (3.14 / 16) = dis / 0.196
     uint8_t MOTOR_Step = MOTOR_Distance_cm * MOTOR_K(0) / 0.196;
     MOTOR_MoveStep(MOTOR, MOTOR_Step);
+}
+
+
+void MOTOR_MoveLeft(float MOTOR_Distance_cm)
+{
+    MOTOR_MoveDist(1, MOTOR_Distance_cm);
+}
+
+void MOTOR_MoveRight(float MOTOR_Distance_cm)
+{
+    MOTOR_MoveLeft(-MOTOR_Distance_cm);
+}
+
+void MOTOR_MoveUp(float MOTOR_Distance_cm)
+{
+    MOTOR_MoveDist(2, MOTOR_Distance_cm);
+}
+
+void MOTOR_MoveDown(float MOTOR_Distance_cm)
+{
+    MOTOR_MoveUp(-MOTOR_Distance_cm);
 }
 
 /*曾经的pwm代码
