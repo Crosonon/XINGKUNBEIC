@@ -30,6 +30,8 @@
 #include "OLED.h"
 #include "MOTOR.h"
 #include "KEY.h"
+#include "MENU.h"
+#include "JOYSTICK.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
