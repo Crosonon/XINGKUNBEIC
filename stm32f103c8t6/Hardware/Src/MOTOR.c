@@ -120,8 +120,8 @@ void MOTOR_MoveDist(uint8_t MOTOR, float MOTOR_Distance_cm)
     MOTOR_SetDir(MOTOR, MOTOR_Dir);
 
     //步数 = 运动距离 / 步距，步距 = 间距1000mm * 步距角，步距角 = 3.14 / 100 / 细分
-    //步数 = dis / (3.14 / 16) = dis / 0.196
-    uint8_t MOTOR_Step = fabsf(MOTOR_Distance_cm) * MOTOR_K(0) / 0.196;
+    //步数 = dis / (3.14 / 32) = dis / 0.098
+    uint8_t MOTOR_Step = fabsf(MOTOR_Distance_cm) * MOTOR_K(0) / 0.098;
     MOTOR_MoveStep(MOTOR, MOTOR_Step);
 }
 

@@ -14,7 +14,7 @@ void MOTOR_MoveDown(float MOTOR_Distance_cm);
 // uint8_t MOTOR_SetPin(uint8_t MOTOR);
 // void MOTOR_InitTool(void);
 // void MOTOR_SetDir(uint8_t MOTOR, uint8_t MOTOR_Dir);
-// void MOTOR_MoveStep(uint8_t MOTOR, uint8_t MOTOR_Step);
+void MOTOR_MoveStep(uint8_t MOTOR, uint8_t MOTOR_Step);
 // void MOTOR_MoveDist(uint8_t MOTOR, float MOTOR_Distance);
 
 // void MOTOR_SetFreq(int MOTOR, int Freq);

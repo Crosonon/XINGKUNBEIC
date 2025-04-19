@@ -58,8 +58,8 @@ uint8_t rx_data;
 
 uint16_t x_Now = 0;
 uint16_t y_Now = 0;
-uint16_t x_Set = 0;
-uint16_t y_Set = 0;
+uint16_t x_Set = 100;
+uint16_t y_Set = 100;
 uint16_t x_Del = 0;
 uint16_t y_Del = 0;
 
@@ -154,13 +154,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     x_Del = x_Set - x_Now;
     y_Del = y_Set - y_Now;
 
-    if(JoyxCH0 < 1) MOTOR_MoveRight(0.2);
-    if(JoyxCH0 > 3) MOTOR_MoveLeft(0.2);
-    if(JoyyCH1 < 1) MOTOR_MoveDown(0.2);
-    if(JoyyCH1 > 3) MOTOR_MoveUp(0.2);
-    
+
     tim_i += 1;
-    if(tim_i == 10)
+    if(tim_i == 100)
     {
       tim_i = 0;
       {
@@ -177,6 +173,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         VoltCH2 = adcData[2] * (3.3 / 4096);
         OLED_ShowFloat(1,1,JoyxCH0);
         OLED_ShowFloat(2,1,JoyyCH1);
+        OLED_ShowNum(1,6,x_Set,3);
+        OLED_ShowNum(2,6,y_Set,3);
+        if(JoyxCH0 < 1) x_Set -= 1;
+        if(JoyxCH0 > 3) x_Set += 1;
+        if(JoyyCH1 < 1) y_Set -= 1;
+        if(JoyyCH1 > 3) y_Set += 1;
+
         OLED_ShowFloat(3,1,VoltCH2);
       }
     }
@@ -240,7 +243,13 @@ int main(void)
     KEY_Act(KEY_GetNum());
 
 
-    HAL_Delay(20);
+    // MOTOR_MoveLeft((x_Set - 100) * 0.01);
+    // MOTOR_MoveUp(0.1);
+    // MOTOR_MoveStep(2,1);
+
+    HAL_GPIO_WritePin(Motor_2H_Step_GPIO_Port, Motor_2H_Step_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(Motor_2H_Step_GPIO_Port, Motor_2H_Step_Pin , GPIO_PIN_RESET);
+    HAL_Delay(1);
   }
   /* USER CODE END 3 */
 }
