@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "adc.h"
+#include "dma.h"
 #include "i2c.h"
 #include "tim.h"
 #include "usart.h"
@@ -52,6 +53,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+uint8_t KeyNum = 0;
+
 uint8_t rx_data;
 
 uint16_t x_Now = 0;
@@ -60,6 +63,11 @@ uint16_t x_Set = 0;
 uint16_t y_Set = 0;
 uint16_t x_Del = 0;
 uint16_t y_Del = 0;
+
+uint32_t adcData[3];
+float Joy1CH0;
+float Joy2CH1;
+float VoltCH2;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -96,7 +104,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
           uart1_rx_state = 0;
           uart1_rx_buffer[uart1_rx_length] = '\0';
           uart1_rx_flag = 1;
-
+          
           x_Now = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
           y_Now = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
         } 
@@ -115,7 +123,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 }
 
 //tim1回调，10ms触发一次，设定电机转动
-void HAL_TIM_RxCpltCallback(TIM_HandleTypeDef *htim)
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim -> Instance == TIM1)
   {
@@ -124,7 +132,9 @@ void HAL_TIM_RxCpltCallback(TIM_HandleTypeDef *htim)
     x_Del = x_Set - x_Now;
     y_Del = y_Set - y_Now;
 
-
+    Joy1CH0 = adcData[0] * (3.3 / 4096);
+    Joy2CH1 = adcData[1] * (3.3 / 4096);
+    VoltCH2 = adcData[2] * (3.3 / 4096);
   }
 }
 /* USER CODE END 0 */
@@ -158,6 +168,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_ADC1_Init();
   MX_TIM1_Init();
   MX_I2C2_Init();
@@ -165,24 +176,27 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  HAL_ADC_Start_DMA(&hadc1, adcData, 3);
   OLED_Init();
+  HAL_TIM_Base_Start_IT(&htim1);
   MOTOR_Init();
   HAL_UART_Receive_IT(&huart1, &rx_data, 1);
 
-  uint8_t KeyNum = 0;
-
   /* USER CODE END 2 */
-
+  
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-  
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
     KEY_Act(KEY_GetNum());
-
+    OLED_Clear();
+    OLED_ShowFloat(1,1,Joy1CH0);
+    OLED_ShowFloat(2,1,Joy2CH1);
+    OLED_ShowFloat(3,1,VoltCH2);
+    HAL_Delay(1000);
   }
   /* USER CODE END 3 */
 }

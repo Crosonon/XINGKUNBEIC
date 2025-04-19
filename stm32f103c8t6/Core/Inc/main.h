@@ -95,6 +95,8 @@ void Error_Handler(void);
 #define Key5_GPIO_Port GPIOA
 #define Laser_Pin GPIO_PIN_3
 #define Laser_GPIO_Port GPIOB
+#define SW1_Pin GPIO_PIN_5
+#define SW1_GPIO_Port GPIOB
 #define Key1_Pin GPIO_PIN_8
 #define Key1_GPIO_Port GPIOB
 #define Key2_Pin GPIO_PIN_9

@@ -16,7 +16,7 @@ uint16_t Pin = 0x0000;
 
 void MOTOR_Init(void)
 {
-    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1 | TIM_CHANNEL_2);
+    
 } 
 
 uint8_t MOTOR_SetPin(uint8_t MOTOR)
@@ -76,7 +76,7 @@ float MOTOR_K(float dis_cm)
     return pow(((pow(dis_cm, 2) + (10000) )/ 10000), 0.5);
 }
 
-void MOTOR_SetEn(uint8_t MOTOR, uint8_t MOTOR_En)
+void MOTOR_SetEn(uint8_t MOTOR, GPIO_PinState MOTOR_En)
 {
     Tool = En;
     if (MOTOR_SetPin(MOTOR))
@@ -86,7 +86,7 @@ void MOTOR_SetEn(uint8_t MOTOR, uint8_t MOTOR_En)
     MOTOR_InitTool();
 }
 
-void MOTOR_SetDir(uint8_t MOTOR, uint8_t MOTOR_Dir)
+void MOTOR_SetDir(uint8_t MOTOR, GPIO_PinState MOTOR_Dir)
 {
     Tool = Dir;
     if (MOTOR_SetPin(MOTOR))
@@ -114,9 +114,9 @@ void MOTOR_MoveStep(uint8_t MOTOR, uint8_t MOTOR_Step)
 
 void MOTOR_MoveDist(uint8_t MOTOR, float MOTOR_Distance_cm)
 {
-    uint8_t MOTOR_Dir;
-    if (MOTOR_Distance_cm > 0) MOTOR_Dir = 0;
-    if (MOTOR_Distance_cm < 0) MOTOR_Dir = 1;
+    GPIO_PinState MOTOR_Dir;
+    if (MOTOR_Distance_cm > 0) MOTOR_Dir = GPIO_PIN_RESET;
+    if (MOTOR_Distance_cm < 0) MOTOR_Dir = GPIO_PIN_SET;
     MOTOR_SetDir(MOTOR, MOTOR_Dir);
 
     //步数 = 运动距离 / 步距，步距 = 间距1000mm * 步距角，步距角 = 3.14 / 100 / 细分
