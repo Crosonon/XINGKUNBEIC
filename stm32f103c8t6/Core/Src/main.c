@@ -30,6 +30,8 @@
 #include "OLED.h"
 #include "MOTOR.h"
 #include "KEY.h"
+#include "MENU.h"
+#include "JOYSTICK.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -177,9 +179,10 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+  
     /* USER CODE END WHILE */
     /* USER CODE BEGIN 3 */
-    KeyNum= KEY_GetNum();
+    KEY_Act(KEY_GetNum());
     OLED_ShowNum(1,3,x_Set,5);
     // OLED_ShowNum(2,3,y_Now,5);
 		if (KeyNum == 1)
