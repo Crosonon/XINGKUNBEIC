@@ -1,0 +1,8 @@
+.vscode
+*.uvoptx
+*.uvguix
+*.uvguix.*
+*/MDK-ARM/Laser Control
+*.lst
+RTE
+DebugConfig
