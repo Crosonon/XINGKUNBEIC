@@ -5,14 +5,17 @@
 
 #define Motor_En_GPIO_Port GPIOB
 #define Motor_Dir_GPIO_Port GPIOB
-#define Motor_Step_GPIO_Port GPIOA
+
 
 #define En 1
 #define Dir 2
 #define Step 3
 
+GPIO_TypeDef * Motor_Step_GPIO_Port;
 uint8_t Tool = 0;
 uint16_t Pin = 0x0000;
+
+extern uint16_t x_Set;
 
 void MOTOR_Init(void)
 {
@@ -47,13 +50,15 @@ uint8_t MOTOR_SetPin(uint8_t MOTOR)
     }
     if (Tool == Step)
     {
-        if (MOTOR == 1 | MOTOR == 3)
+        if (MOTOR == 1)
         {
-            Pin = Pin | Motor_1L_Step_Pin;
+            Pin = Motor_1L_Step_Pin;
+            Motor_Step_GPIO_Port = GPIOA;
         }
-        if (MOTOR == 2 | MOTOR == 3)
+        if (MOTOR == 2)
         {
-            Pin = Pin | Motor_2H_Step_Pin;
+            Pin = Motor_2H_Step_Pin;
+            Motor_Step_GPIO_Port = GPIOB;
         }
         return 3;
     }
@@ -106,7 +111,6 @@ void MOTOR_MoveStep(uint8_t MOTOR, uint8_t MOTOR_Step)
         {
             HAL_GPIO_WritePin(Motor_Step_GPIO_Port, Pin, GPIO_PIN_SET);
             HAL_GPIO_WritePin(Motor_Step_GPIO_Port, Pin, GPIO_PIN_RESET);
-            HAL_Delay(1);
         }
     }
     MOTOR_InitTool();

@@ -38,6 +38,9 @@
         * Output
         * EVENT_OUT
         * EXTI
+     PA1   ------> ADCx_IN1
+     PB0   ------> ADCx_IN8
+     PB1   ------> ADCx_IN9
 */
 void MX_GPIO_Init(void)
 {
@@ -50,16 +53,21 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, Diastimeter_Trig_Pin|Motor_1L_Step_Pin|Motor_2H_Step_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, Diastimeter_Trig_Pin|Motor_1L_Step_Pin|Beep_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, LED1_Pin|LED2_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, Motor_1L_En_Pin|Motor_2H_En_Pin|Laser_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, Motor_1L_En_Pin|Motor_2H_En_Pin|Laser_Pin|Motor_2H_Step_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, Motor_1L_Dir_Pin|Motor_2H_Dir_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin : PA1 */
+  GPIO_InitStruct.Pin = GPIO_PIN_1;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : Diastimeter_Echo_Pin */
   GPIO_InitStruct.Pin = Diastimeter_Echo_Pin;
@@ -67,8 +75,8 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(Diastimeter_Echo_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Diastimeter_Trig_Pin Motor_1L_Step_Pin Motor_2H_Step_Pin */
-  GPIO_InitStruct.Pin = Diastimeter_Trig_Pin|Motor_1L_Step_Pin|Motor_2H_Step_Pin;
+  /*Configure GPIO pins : Diastimeter_Trig_Pin Motor_1L_Step_Pin Beep_Pin */
+  GPIO_InitStruct.Pin = Diastimeter_Trig_Pin|Motor_1L_Step_Pin|Beep_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
@@ -80,6 +88,11 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PB0 PB1 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pins : Motor_1L_En_Pin Motor_2H_En_Pin Motor_1L_Dir_Pin Motor_2H_Dir_Pin
                            Laser_Pin */
@@ -95,6 +108,13 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : Motor_2H_Step_Pin */
+  GPIO_InitStruct.Pin = Motor_2H_Step_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(Motor_2H_Step_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : SW1_Pin */
   GPIO_InitStruct.Pin = SW1_Pin;

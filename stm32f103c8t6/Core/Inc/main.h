@@ -57,8 +57,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define Joy1_Pin GPIO_PIN_1
-#define Joy1_GPIO_Port GPIOA
 #define Diastimeter_Echo_Pin GPIO_PIN_4
 #define Diastimeter_Echo_GPIO_Port GPIOA
 #define Diastimeter_Trig_Pin GPIO_PIN_5
@@ -67,10 +65,6 @@ void Error_Handler(void);
 #define LED1_GPIO_Port GPIOA
 #define LED2_Pin GPIO_PIN_7
 #define LED2_GPIO_Port GPIOA
-#define Joy2_Pin GPIO_PIN_0
-#define Joy2_GPIO_Port GPIOB
-#define Battery_Pin GPIO_PIN_1
-#define Battery_GPIO_Port GPIOB
 #define OLED_SCL_Pin GPIO_PIN_10
 #define OLED_SCL_GPIO_Port GPIOB
 #define OLED_SDA_Pin GPIO_PIN_11
@@ -85,8 +79,8 @@ void Error_Handler(void);
 #define Motor_2H_Dir_GPIO_Port GPIOB
 #define Motor_1L_Step_Pin GPIO_PIN_8
 #define Motor_1L_Step_GPIO_Port GPIOA
-#define Motor_2H_Step_Pin GPIO_PIN_9
-#define Motor_2H_Step_GPIO_Port GPIOA
+#define Beep_Pin GPIO_PIN_9
+#define Beep_GPIO_Port GPIOA
 #define Key3_Pin GPIO_PIN_10
 #define Key3_GPIO_Port GPIOA
 #define Key4_Pin GPIO_PIN_11
@@ -95,6 +89,8 @@ void Error_Handler(void);
 #define Key5_GPIO_Port GPIOA
 #define Laser_Pin GPIO_PIN_3
 #define Laser_GPIO_Port GPIOB
+#define Motor_2H_Step_Pin GPIO_PIN_4
+#define Motor_2H_Step_GPIO_Port GPIOB
 #define SW1_Pin GPIO_PIN_5
 #define SW1_GPIO_Port GPIOB
 #define Key1_Pin GPIO_PIN_8
@@ -111,7 +107,7 @@ extern uint16_t x_Set;
 extern uint16_t y_Set;
 extern uint16_t x_Del;
 extern uint16_t y_Del;
-extern uint32_t adcData[3];
+extern uint16_t adcData[3];
 extern float JoyxCH0;
 extern float JoyyCH1;
 extern float VoltCH2;

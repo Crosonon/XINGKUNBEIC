@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "adc.h"
+#include "dma.h"
 #include "i2c.h"
 #include "tim.h"
 #include "usart.h"
@@ -63,12 +64,11 @@ uint16_t y_Set = 100;
 uint16_t x_Del = 0;
 uint16_t y_Del = 0;
 
-uint32_t adcData[3];
+uint16_t adcData[3];
 float JoyxCH0;
 float JoyyCH1;
 float VoltCH2;
 
-uint16_t tim_i = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -147,6 +147,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 //tim1回调，10ms触发一次，设定电机转动
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
+  static uint16_t tim_i = 0;
   if (htim -> Instance == TIM1)
   {
     //10ms触发一次
@@ -159,31 +160,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     if(tim_i == 100)
     {
       tim_i = 0;
-      {
-        for (uint8_t i = 0; i < 3; i++)
-        {
-          HAL_ADC_Start(&hadc1);
-          HAL_ADC_PollForConversion(&hadc1, 50);
-          adcData[i] = HAL_ADC_GetValue(&hadc1);
-        }
-        HAL_ADC_Stop(&hadc1);
-        // HAL_Delay(500);
-        JoyxCH0 = adcData[0] * (3.3 / 4096);
-        JoyyCH1 = adcData[1] * (3.3 / 4096);
-        VoltCH2 = adcData[2] * (3.3 / 4096);
-        OLED_ShowFloat(1,1,JoyxCH0);
-        OLED_ShowFloat(2,1,JoyyCH1);
-        OLED_ShowNum(1,6,x_Set,3);
-        OLED_ShowNum(2,6,y_Set,3);
-        if(JoyxCH0 < 1) x_Set -= 1;
-        if(JoyxCH0 > 3) x_Set += 1;
-        if(JoyyCH1 < 1) y_Set -= 1;
-        if(JoyyCH1 > 3) y_Set += 1;
-
-        OLED_ShowFloat(3,1,VoltCH2);
-      }
     }
-
   }
 }
 /* USER CODE END 0 */
@@ -217,6 +194,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_ADC1_Init();
   MX_TIM1_Init();
   MX_I2C2_Init();
@@ -226,6 +204,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   // HAL_ADC_Start_DMA(&hadc1, adcData, 3);
   HAL_ADCEx_Calibration_Start(&hadc1);
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adcData, 3);
   OLED_Init();
   HAL_TIM_Base_Start_IT(&htim1);
   MOTOR_Init();
@@ -238,18 +217,43 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
     /* USER CODE BEGIN 3 */
     KEY_Act(KEY_GetNum());
 
-
-    // MOTOR_MoveLeft((x_Set - 100) * 0.01);
     // MOTOR_MoveUp(0.1);
     // MOTOR_MoveStep(2,1);
+    JoyxCH0 = adcData[0] * (3.3 / 4096);
+    JoyyCH1 = adcData[1] * (3.3 / 4096);
+    VoltCH2 = adcData[2] * (3.3 / 4096);
+    OLED_ShowFloat(1,1,JoyxCH0);
+    OLED_ShowFloat(2,1,JoyyCH1);
+    OLED_ShowFloat(3,1,VoltCH2);
+    OLED_ShowNum(1,6,x_Set,3);
+    OLED_ShowNum(2,6,y_Set,3);
 
-    HAL_GPIO_WritePin(Motor_2H_Step_GPIO_Port, Motor_2H_Step_Pin, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(Motor_2H_Step_GPIO_Port, Motor_2H_Step_Pin , GPIO_PIN_RESET);
-    HAL_Delay(1);
+    
+    if(JoyxCH0 < 1)
+    {
+      MOTOR_MoveRight(0.1);
+      x_Set ++;
+    }
+    if(JoyxCH0 > 3)
+    {
+      MOTOR_MoveRight(-0.1);
+      x_Set --;
+    }
+    if(JoyyCH1 < 1)
+    {
+      MOTOR_MoveUp(-0.1);
+      y_Set ++;
+    }
+    if(JoyyCH1 > 3)
+    {
+      MOTOR_MoveUp(0.1);
+      y_Set --;
+    }
+    // if(JoyyCH1 < 1) y_Set -= 1;
+    // if(JoyyCH1 > 3) y_Set += 1;
   }
   /* USER CODE END 3 */
 }
