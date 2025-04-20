@@ -57,17 +57,16 @@ uint8_t KeyNum = 0;
 
 uint8_t rx_data;
 
-uint16_t x_Now = 0;
-uint16_t y_Now = 0;
-uint16_t x_Set = 100;
-uint16_t y_Set = 100;
-uint16_t x_Del = 0;
-uint16_t y_Del = 0;
+uint16_t xy_Now[2];
+uint16_t xy_Set[2];
+uint16_t xy_Del[2];
 
 uint16_t adcData[3];
 float JoyxCH0;
 float JoyyCH1;
 float VoltCH2;
+
+uint16_t xy_Corner_Set[4][2];//用于存储四个角落数据
 
 /* USER CODE END PV */
 
@@ -120,13 +119,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
           uart1_rx_flag = 1;
           if (uart1_rx_mode == 0)//写入xynow
           {
-            x_Now = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
-            y_Now = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
+            xy_Now[0] = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
+            xy_Now[1] = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
           }
           else if (uart1_rx_mode == 1)//写入xyset
           {
-            x_Set = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
-            y_Set = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
+            xy_Set[0] = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
+            xy_Set[1] = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
           }
           uart1_rx_mode = 0;
         } 
@@ -152,15 +151,17 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   {
     //10ms触发一次
     //更新x和y
-    x_Del = x_Set - x_Now;
-    y_Del = y_Set - y_Now;
+    // for (uint8_t i = 0; i < 2; i ++)
+    // {
+    //   xy_Del[i] = xy_Set[i] - xy_Now[i];
+    // }
 
 
-    tim_i += 1;
-    if(tim_i == 100)
-    {
-      tim_i = 0;
-    }
+    // tim_i += 1;
+    // if(tim_i == 100)
+    // {
+    //   tim_i = 0;
+    // }
   }
 }
 /* USER CODE END 0 */
@@ -225,32 +226,32 @@ int main(void)
     JoyxCH0 = adcData[0] * (3.3 / 4096);
     JoyyCH1 = adcData[1] * (3.3 / 4096);
     VoltCH2 = adcData[2] * (3.3 / 4096);
-    OLED_ShowFloat(1,1,JoyxCH0);
-    OLED_ShowFloat(2,1,JoyyCH1);
-    OLED_ShowFloat(3,1,VoltCH2);
-    OLED_ShowNum(1,6,x_Set,3);
-    OLED_ShowNum(2,6,y_Set,3);
+    // OLED_ShowFloat(1,1,JoyxCH0);
+    // OLED_ShowFloat(2,1,JoyyCH1);
+    // OLED_ShowFloat(3,1,VoltCH2);
+    // OLED_ShowNum(1,6,xy_Set[0],3);
+    // OLED_ShowNum(2,6,xy_Set[1],3);
 
     
     if(JoyxCH0 < 1)
     {
       MOTOR_MoveRight(0.1);
-      x_Set ++;
+      xy_Set[0] ++;
     }
     if(JoyxCH0 > 3)
     {
       MOTOR_MoveRight(-0.1);
-      x_Set --;
+      xy_Set[0] --;
     }
     if(JoyyCH1 < 1)
     {
       MOTOR_MoveUp(-0.1);
-      y_Set ++;
+      xy_Set[1] ++;
     }
     if(JoyyCH1 > 3)
     {
       MOTOR_MoveUp(0.1);
-      y_Set --;
+      xy_Set[1] --;
     }
     // if(JoyyCH1 < 1) y_Set -= 1;
     // if(JoyyCH1 > 3) y_Set += 1;
