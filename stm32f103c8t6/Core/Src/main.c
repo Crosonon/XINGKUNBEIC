@@ -206,10 +206,12 @@ int main(void)
   // HAL_ADC_Start_DMA(&hadc1, adcData, 3);
   HAL_ADCEx_Calibration_Start(&hadc1);
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adcData, 3);
-  OLED_Init();
   HAL_TIM_Base_Start_IT(&htim1);
-  MOTOR_Init();
   HAL_UART_Receive_IT(&huart1, &rx_data, 1);
+  OLED_Init();
+  MOTOR_Init();
+
+  MENU_Init();
 
   /* USER CODE END 2 */
 
@@ -231,8 +233,6 @@ int main(void)
     // OLED_ShowFloat(3,1,VoltCH2);
     // OLED_ShowNum(1,6,xy_Set[0],3);
     // OLED_ShowNum(2,6,xy_Set[1],3);
-
-    
     if(JoyxCH0 < 1)
     {
       MOTOR_MoveRight(0.1);
@@ -253,8 +253,8 @@ int main(void)
       MOTOR_MoveUp(0.1);
       xy_Set[1] --;
     }
-    // if(JoyyCH1 < 1) y_Set -= 1;
-    // if(JoyyCH1 > 3) y_Set += 1;
+
+    MENU_PageShow();
   }
   /* USER CODE END 3 */
 }

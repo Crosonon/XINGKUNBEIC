@@ -4,6 +4,12 @@
 #include "stdint.h"
 #include "gpio.h"
 
+typedef enum
+{
+    Motor_Off = 0,
+    Motor_On
+} MOTOR_State;
+
 void MOTOR_Init(void);
 void MOTOR_SetEn(uint8_t MOTOR, GPIO_PinState MOTOR_En);
 void MOTOR_MoveLeft(float MOTOR_Distance_cm);

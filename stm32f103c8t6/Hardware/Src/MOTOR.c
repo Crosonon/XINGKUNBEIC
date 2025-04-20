@@ -14,6 +14,7 @@
 GPIO_TypeDef * Motor_Step_GPIO_Port;
 uint8_t Tool = 0;
 uint16_t Pin = 0x0000;
+MOTOR_State MOTOR_State_Now;
 
 extern uint16_t x_Set;
 
