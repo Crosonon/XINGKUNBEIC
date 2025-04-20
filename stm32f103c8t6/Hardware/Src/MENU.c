@@ -11,6 +11,7 @@ extern MOTOR_State MOTOR_State_Now;
 extern float VoltCH2;
 extern uint16_t xy_Corner_Set[4][2];
 
+
 void MENU_Init(void)
 {
     MENU_PageInit(Page_Main);
@@ -134,22 +135,18 @@ void Key_Act1(void)//
                 break;
             }
             break;
-        case Page_Points:
-            switch (MENU_Cursor)
+        case Page_Points://将xyset的值写入当前光标位置的值
+            for(uint8_t i = 0; i < 2; i ++)
             {
-            case 1:
-                /* code */
-                break;
-            case 2:
-                /* code */
-                break;
-            case 3:
-                /* code */
-                break;
-            case 4:
-                /* code */
-                break;
+                xy_Corner_Set[MENU_Cursor][i] = xy_Set[i];
+                // xy_Set[i] = 0;
             }
+            for(uint8_t i = 0; i < 4; i ++)
+            {
+                if (xy_Corner_Set[i][0] == 0) break;
+                xy_Dis_Set();
+            }
+            
             break;
     }
 }

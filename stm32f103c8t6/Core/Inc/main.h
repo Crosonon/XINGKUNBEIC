@@ -105,10 +105,6 @@ extern uint16_t xy_Now[2];
 extern uint16_t xy_Set[2];
 extern uint16_t xy_Del[2];
 extern uint16_t xy_Corner_Set[4][2];
-extern uint16_t adcData[3];
-extern float JoyxCH0;
-extern float JoyyCH1;
-extern float VoltCH2;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

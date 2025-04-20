@@ -53,18 +53,11 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint8_t KeyNum = 0;
-
 uint8_t rx_data;
 
 uint16_t xy_Now[2];
 uint16_t xy_Set[2];
 uint16_t xy_Del[2];
-
-uint16_t adcData[3];
-float JoyxCH0;
-float JoyyCH1;
-float VoltCH2;
 
 uint16_t xy_Corner_Set[4][2];//用于存储四个角落数据
 
@@ -222,12 +215,10 @@ int main(void)
     /* USER CODE END WHILE */
     /* USER CODE BEGIN 3 */
     KEY_Act(KEY_GetNum());
-
+    ADC_Update();
+    MENU_PageShow();
     // MOTOR_MoveUp(0.1);
     // MOTOR_MoveStep(2,1);
-    JoyxCH0 = adcData[0] * (3.3 / 4096);
-    JoyyCH1 = adcData[1] * (3.3 / 4096);
-    VoltCH2 = adcData[2] * (3.3 / 4096);
     // OLED_ShowFloat(1,1,JoyxCH0);
     // OLED_ShowFloat(2,1,JoyyCH1);
     // OLED_ShowFloat(3,1,VoltCH2);
@@ -254,7 +245,6 @@ int main(void)
       xy_Set[1] --;
     }
 
-    MENU_PageShow();
   }
   /* USER CODE END 3 */
 }

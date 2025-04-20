@@ -35,12 +35,16 @@ extern "C" {
 extern ADC_HandleTypeDef hadc1;
 
 /* USER CODE BEGIN Private defines */
-
+extern uint16_t adcData[3];
+extern float JoyxCH0;
+extern float JoyyCH1;
+extern float VoltCH2;
 /* USER CODE END Private defines */
 
 void MX_ADC1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+void ADC_Update(void);
 
 /* USER CODE END Prototypes */
 

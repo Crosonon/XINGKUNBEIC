@@ -21,7 +21,10 @@
 #include "adc.h"
 
 /* USER CODE BEGIN 0 */
-
+uint16_t adcData[3];
+float JoyxCH0;
+float JoyyCH1;
+float VoltCH2;
 /* USER CODE END 0 */
 
 ADC_HandleTypeDef hadc1;
@@ -167,5 +170,10 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 }
 
 /* USER CODE BEGIN 1 */
-
+void ADC_Update(void)
+{
+  JoyxCH0 = adcData[0] * (3.3 / 4096);
+  JoyyCH1 = adcData[1] * (3.3 / 4096);
+  VoltCH2 = adcData[2] * (3.3 / 4096);
+}
 /* USER CODE END 1 */
