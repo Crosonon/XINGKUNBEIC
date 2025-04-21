@@ -3,6 +3,7 @@
 
 #include "stdint.h"
 #include "gpio.h"
+#include "Coordinate.h"
 
 typedef enum
 {
