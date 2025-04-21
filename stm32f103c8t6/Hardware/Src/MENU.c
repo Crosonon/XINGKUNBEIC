@@ -2,14 +2,13 @@
 #include "OLED.h"
 #include "KEY.h"
 #include "MOTOR.h"
-#include "adc.h"
+#include "Coordinate.h"
 
 static uint8_t MENU_Cursor = 1;
 static Menu_Page MENU_CurrentPage = Page_Main;
 
 extern MOTOR_State MOTOR_State_Now;
 extern float VoltCH2;
-extern uint16_t xy_Corner_Set[4][2];
 
 
 void MENU_Init(void)
@@ -76,18 +75,18 @@ void MENU_PageShow(void)
         case Page_Points:
             for(uint8_t i = 0; i < 4; i ++)
             {
-                if(xy_Corner_Set[i][0])
+                if(sys_set.Pixel_Corner_Set[i].x)
                 {
-                    OLED_ShowNum(i + 1, 5, xy_Corner_Set[i][0], 4);
+                    OLED_ShowNum(i + 1, 5, sys_set.Pixel_Corner_Set[i].x, 4);
                 }
                 else
                 {
                     OLED_ShowString(i + 1, 6, "x");
                     OLED_ShowNum(i + 1, 7, i + 1, 1);
                 }
-                if(xy_Corner_Set[i][1])
+                if(sys_set.Pixel_Corner_Set[i].y)
                 {
-                    OLED_ShowNum(i + 1, 10, xy_Corner_Set[i][1], 4);
+                    OLED_ShowNum(i + 1, 10, sys_set.Pixel_Corner_Set[i].y, 4);
                 }
                 else
                 {
@@ -135,18 +134,15 @@ void Key_Act1(void)//
                 break;
             }
             break;
-        case Page_Points://将xyset的值写入当前光标位置的值
-            for(uint8_t i = 0; i < 2; i ++)
-            {
-                xy_Corner_Set[MENU_Cursor][i] = xy_Set[i];
-                // xy_Set[i] = 0;
-            }
+        case Page_Points://将sys_set.Pixel_Corner_Set的值写入当前光标位置的值
+            sys_set.Pixel_Corner_Set[MENU_Cursor] = Pixel_Set;
+            Pixel_Set.x = 0;
+            Pixel_Set.y = 0;
             for(uint8_t i = 0; i < 4; i ++)
             {
-                if (xy_Corner_Set[i][0] == 0) break;
-                xy_Dis_Set();
+                if (sys_set.Pixel_Corner_Set[i].x == 0) break;
+                Coordinate_Init();
             }
-            
             break;
     }
 }

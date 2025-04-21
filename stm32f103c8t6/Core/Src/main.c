@@ -24,6 +24,7 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+#include "Coordinate.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -54,12 +55,6 @@
 
 /* USER CODE BEGIN PV */
 uint8_t rx_data;
-
-uint16_t xy_Now[2];
-uint16_t xy_Set[2];
-uint16_t xy_Del[2];
-
-uint16_t xy_Corner_Set[4][2];//用于存储四个角落数据
 
 /* USER CODE END PV */
 
@@ -110,15 +105,15 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
           uart1_rx_state = 0;
           uart1_rx_buffer[uart1_rx_length] = '\0';
           uart1_rx_flag = 1;
-          if (uart1_rx_mode == 0)//写入xynow
+          if (uart1_rx_mode == 0)//写入pixnow
           {
-            xy_Now[0] = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
-            xy_Now[1] = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
+            Pixel_Now.x = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
+            Pixel_Now.y = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
           }
-          else if (uart1_rx_mode == 1)//写入xyset
+          else if (uart1_rx_mode == 1)//写入pixset
           {
-            xy_Set[0] = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
-            xy_Set[1] = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
+            Pixel_Set.x = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
+            Pixel_Set.y = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
           }
           uart1_rx_mode = 0;
         } 
@@ -143,18 +138,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim -> Instance == TIM1)
   {
     //10ms触发一次
-    //更新x和y
-    // for (uint8_t i = 0; i < 2; i ++)
-    // {
-    //   xy_Del[i] = xy_Set[i] - xy_Now[i];
-    // }
-
-
-    // tim_i += 1;
-    // if(tim_i == 100)
-    // {
-    //   tim_i = 0;
-    // }
+    //更新x和y，以及更新disdel
+    Pixel_Del.x = Pixel_Set.x - Pixel_Now.x;
+    Pixel_Del.y = Pixel_Set.y - Pixel_Now.y;
+    Dis_Del = Pixel_to_cm(Pixel_Del);
+    tim_i += 1;
+    if(tim_i == 100)
+    {
+      tim_i = 0;
+    }
   }
 }
 /* USER CODE END 0 */
@@ -203,11 +195,9 @@ int main(void)
   HAL_UART_Receive_IT(&huart1, &rx_data, 1);
   OLED_Init();
   MOTOR_Init();
-
   MENU_Init();
 
   /* USER CODE END 2 */
-
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -217,34 +207,11 @@ int main(void)
     KEY_Act(KEY_GetNum());
     ADC_Update();
     MENU_PageShow();
-    // MOTOR_MoveUp(0.1);
-    // MOTOR_MoveStep(2,1);
-    // OLED_ShowFloat(1,1,JoyxCH0);
-    // OLED_ShowFloat(2,1,JoyyCH1);
-    // OLED_ShowFloat(3,1,VoltCH2);
-    // OLED_ShowNum(1,6,xy_Set[0],3);
-    // OLED_ShowNum(2,6,xy_Set[1],3);
-    if(JoyxCH0 < 1)
-    {
-      MOTOR_MoveRight(0.1);
-      xy_Set[0] ++;
-    }
-    if(JoyxCH0 > 3)
-    {
-      MOTOR_MoveRight(-0.1);
-      xy_Set[0] --;
-    }
-    if(JoyyCH1 < 1)
-    {
-      MOTOR_MoveUp(-0.1);
-      xy_Set[1] ++;
-    }
-    if(JoyyCH1 > 3)
-    {
-      MOTOR_MoveUp(0.1);
-      xy_Set[1] --;
-    }
 
+    if(absDis(Dis_Del) > 1)//如果总距离小于1
+    {
+      MOTOR_Move(&Dis_Del);//移动一段距离
+    }
   }
   /* USER CODE END 3 */
 }

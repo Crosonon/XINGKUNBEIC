@@ -1,7 +1,7 @@
 #include "math.h"
 #include "MOTOR.h"
 #include "gpio.h"
-#include "tim.h"
+#include "Coordinate.h"
 
 #define Motor_En_GPIO_Port GPIOB
 #define Motor_Dir_GPIO_Port GPIOB
@@ -11,6 +11,7 @@
 #define Dir 2
 #define Step 3
 
+MOTOR_Set motor_sys_set;
 GPIO_TypeDef * Motor_Step_GPIO_Port;
 uint8_t Tool = 0;
 uint16_t Pin = 0x0000;
@@ -117,7 +118,17 @@ void MOTOR_MoveStep(uint8_t MOTOR, uint8_t MOTOR_Step)
     MOTOR_InitTool();
 }
 
-void MOTOR_MoveDist(uint8_t MOTOR, float MOTOR_Distance_cm)
+uint8_t MOTOR_Dis_to_Step(float dis_cm)
+{
+    return fabsf(dis_cm) / 3.14 / motor_sys_set.subdivide / MOTOR_K(0);
+}
+
+float MOTOR_Step_to_Dis(uint8_t step)
+{
+    return step * 3.14 * motor_sys_set.subdivide * MOTOR_K(0);
+}
+
+void MOTOR_MoveDis(uint8_t MOTOR, float MOTOR_Distance_cm)
 {
     GPIO_PinState MOTOR_Dir;
     if (MOTOR_Distance_cm > 0) MOTOR_Dir = GPIO_PIN_RESET;
@@ -126,14 +137,13 @@ void MOTOR_MoveDist(uint8_t MOTOR, float MOTOR_Distance_cm)
 
     //步数 = 运动距离 / 步距，步距 = 间距1000mm * 步距角，步距角 = 3.14 / 100 / 细分
     //步数 = dis / (3.14 / 32) = dis / 0.098
-    uint8_t MOTOR_Step = fabsf(MOTOR_Distance_cm) / 0.098 / MOTOR_K(0);
+    uint8_t MOTOR_Step = MOTOR_Dis_to_Step(fabsf(MOTOR_Distance_cm));
     MOTOR_MoveStep(MOTOR, MOTOR_Step);
 }
 
-
 void MOTOR_MoveLeft(float MOTOR_Distance_cm)
 {
-    MOTOR_MoveDist(1, -MOTOR_Distance_cm);
+    MOTOR_MoveDis(1, -MOTOR_Distance_cm);
 }
 
 void MOTOR_MoveRight(float MOTOR_Distance_cm)
@@ -143,12 +153,58 @@ void MOTOR_MoveRight(float MOTOR_Distance_cm)
 
 void MOTOR_MoveUp(float MOTOR_Distance_cm)
 {
-    MOTOR_MoveDist(2, MOTOR_Distance_cm);
+    MOTOR_MoveDis(2, MOTOR_Distance_cm);
 }
 
 void MOTOR_MoveDown(float MOTOR_Distance_cm)
 {
     MOTOR_MoveUp(-MOTOR_Distance_cm);
+}
+
+void MOTOR_MoveDis2D(Distance2D DisDel)
+{
+    MOTOR_MoveRight(Dis_Del.x);
+    MOTOR_MoveDown(Dis_Del.y);
+}
+
+void MOTOR_Move(Distance2D* disdel)
+{
+    Distance2D dismove;
+    Pixel2D stepmove = {20, 20};
+
+    if(MOTOR_Step_to_Dis(stepmove.x) < (disdel->x))
+    {
+        dismove.x = MOTOR_Step_to_Dis(stepmove.x);
+    }
+    else
+    {
+      for (; stepmove.x > 0; stepmove.x --)
+      {
+        if((MOTOR_Step_to_Dis(stepmove.x) - Dis_Del.x) < (MOTOR_Step_to_Dis(stepmove.x) - Dis_Del.x))
+        {
+            dismove.x = MOTOR_Step_to_Dis(stepmove.x);
+        }
+      }
+    }
+    disdel->x -= dismove.x;
+
+    if(MOTOR_Step_to_Dis(stepmove.y) < (disdel->y))
+    {
+        dismove.y = MOTOR_Step_to_Dis(stepmove.y);
+    }
+    else
+    {
+      for (; stepmove.y > 0; stepmove.y --)
+      {
+        if((MOTOR_Step_to_Dis(stepmove.y) - Dis_Del.y) < (MOTOR_Step_to_Dis(stepmove.y) - Dis_Del.y))
+        {
+            dismove.y = MOTOR_Step_to_Dis(stepmove.y);
+        }
+      }
+    }
+    disdel->y -= dismove.y;
+
+    MOTOR_MoveDis2D(dismove);
 }
 
 /*曾经的pwm代码
