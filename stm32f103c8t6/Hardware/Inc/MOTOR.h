@@ -24,11 +24,6 @@ typedef struct
 
 
 //使能状态，由物理开关控制
-typedef enum
-{
-    Disable = 0,
-    Enable,
-} Motor_En_State;
 
 //锁定状态（锁定为不能动，解锁为能动）,在有需要的地方设置
 typedef enum
@@ -51,7 +46,7 @@ typedef enum
 typedef struct 
 {
     uint8_t Number;
-    Motor_En_State En;
+    FunctionalState En;
     Motor_Lock_State Lock;
     Motor_Dir_State Dir;
     uint8_t Speed;
@@ -62,9 +57,10 @@ extern Motor_Drive_Set motor_drive_set;
 extern Motor_Config motor_1L ;
 extern Motor_Config Motor_2H ;
 
-void MOTOR_Init(void);
+void Motor_Init(void);
 uint8_t Motor_Move_Unit(Motor_Config motor);
 uint8_t Motor_Move_MutiUnit(Motor_Config motor, uint16_t times);
 uint8_t Motor_Move_Step(Motor_Config motor);
+uint8_t Motor_Switch_En(void);
 
 #endif

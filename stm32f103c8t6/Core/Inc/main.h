@@ -85,8 +85,8 @@ void Error_Handler(void);
 #define Key3_GPIO_Port GPIOA
 #define Key4_Pin GPIO_PIN_11
 #define Key4_GPIO_Port GPIOA
-#define Key5_Pin GPIO_PIN_12
-#define Key5_GPIO_Port GPIOA
+#define Motor_Switch_Pin GPIO_PIN_12
+#define Motor_Switch_GPIO_Port GPIOA
 #define Laser_Pin GPIO_PIN_3
 #define Laser_GPIO_Port GPIOB
 #define Motor_2H_Step_Pin GPIO_PIN_4

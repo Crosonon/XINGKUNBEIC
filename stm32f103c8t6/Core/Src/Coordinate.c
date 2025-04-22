@@ -2,7 +2,7 @@
 #include "math.h"
 
 Laser_Point_Ctrl laser = {
-    .Colour = "Rad",
+    .Colour = "Red",
     .Now_Pix = {0, 0},
     .Set_Pix = {0, 0},
     .Del_mm = {0, 0},
@@ -11,7 +11,7 @@ Laser_Point_Ctrl laser = {
 };
 
 Laser_Point_Watch laser_watch = {
-    .Colour = "Rad",
+    .Colour = "Red",
     .Now_Pix = {0, 0},
     .Correct = DISABLE,
     .Correct_K = 1,
@@ -24,6 +24,7 @@ SystemParams sys_set = {
     .origin_point = {0, 0},
     .Calib_Point = {{0,0}},
     .Cam_Point = {0,0},
+    .Motor_Switch = DISABLE,
 };
 
 void Coordinate_Init(void)
@@ -69,4 +70,23 @@ mm_Point Pixel_to_mm(Pixel_Point pix_point)
 float absDis(mm_Point dis2d)
 {
     return powf((powf(dis2d.x, 2) + powf(dis2d.y, 2)), 0.5);
+}
+
+
+uint8_t CheckUpdate_Del(void)
+{
+    static Pixel_Point last_Set;
+    static Pixel_Point last_Now;
+    uint8_t Update = ((last_Now.x - laser.Now_Pix.x) | (last_Now.y - laser.Now_Pix.y)) | ((last_Set.x - laser.Set_Pix.x) | (last_Set.y - laser.Set_Pix.y));
+    if (Update)
+    {
+        Pixel_Point Del_Pix = {
+            Del_Pix.x = laser.Set_Pix.x - laser.Now_Pix.x,
+            Del_Pix.y = laser.Set_Pix.y - laser.Now_Pix.y,
+            };
+        laser.Del_mm = Pixel_to_mm(Del_Pix);
+    }
+    last_Set = laser.Set_Pix;
+    last_Now = laser.Now_Pix;
+    return Update;
 }

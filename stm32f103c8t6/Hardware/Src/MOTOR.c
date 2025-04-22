@@ -11,7 +11,7 @@ Motor_Drive_Set motor_drive_set = {
 //下电机使能锁定方向速度
 Motor_Config motor_1L = {
     .Number = 1,
-    .En = Enable,
+    .En = ENABLE,
     .Lock = Unlocked,
     .Dir = Stop,
     .Speed = 1,
@@ -27,7 +27,7 @@ Motor_Config motor_1L = {
 //上电机使能锁定方向速度
 Motor_Config motor_2H = {
     .Number = 2,
-    .En = Enable,
+    .En = ENABLE,
     .Lock = Unlocked,
     .Dir = Stop,
     .Speed = 1,
@@ -41,7 +41,7 @@ Motor_Config motor_2H = {
     }
 };
 
-void MOTOR_Init(void)
+void Motor_Init(void)
 {
     
 } 
@@ -51,7 +51,7 @@ void MOTOR_Init(void)
 uint8_t Motor_Move_Unit(Motor_Config motor)
 {
     //如果不使能、锁定模式、不动，就不走一步
-    if((motor.En == Disable) || (motor.Lock == Locked) || (motor.Dir == Stop)) return 0;
+    if((motor.En == DISABLE) || (motor.Lock == Locked) || (motor.Dir == Stop)) return 0;
 
     //设置方向
     if(motor.Dir == Up || motor.Dir == Right) HAL_GPIO_WritePin(motor.Pin_Config.Dir_Port, motor.Pin_Config.Dir_Pin, GPIO_PIN_RESET);
@@ -79,4 +79,18 @@ uint8_t Motor_Move_MutiUnit(Motor_Config motor, uint16_t times)
 uint8_t Motor_Move_Step(Motor_Config motor)
 {
     return Motor_Move_MutiUnit(motor, motor.Speed);
+}
+
+//会根据switch的方向更新两个电机的使能情况
+uint8_t Motor_Switch_En(void)
+{
+    sys_set.Motor_Switch = (FunctionalState)HAL_GPIO_ReadPin(Motor_Switch_GPIO_Port, Motor_Switch_Pin);
+
+    motor_1L.En = sys_set.Motor_Switch;
+    motor_2H.En = sys_set.Motor_Switch;
+
+    HAL_GPIO_WritePin(motor_1L.Pin_Config.En_Port, motor_1L.Pin_Config.En_Pin, (GPIO_PinState)motor_1L.En);
+    HAL_GPIO_WritePin(motor_2H.Pin_Config.En_Port, motor_2H.Pin_Config.En_Pin, (GPIO_PinState)motor_2H.En);
+
+    return sys_set.Motor_Switch;
 }

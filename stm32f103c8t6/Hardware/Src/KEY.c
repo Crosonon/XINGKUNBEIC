@@ -40,14 +40,6 @@ uint8_t KEY_GetNum(void)
         Key_Num = 4;
     }
     
-    if(HAL_GPIO_ReadPin(Key5_GPIO_Port, Key5_Pin) == 0)
-    {
-        HAL_Delay(20);
-        while(HAL_GPIO_ReadPin(Key5_GPIO_Port, Key5_Pin) == 0);
-        HAL_Delay(20);
-        Key_Num = 5;
-    }
-
     return Key_Num;
 }
 
@@ -71,11 +63,6 @@ void KEY_Act(uint8_t Key_Num)
     if (Key_Num == 4)
     {
         Key_Act4();
-    }
-
-    if (Key_Num == 5)
-    {
-        Key_Act5();
     }
 }
 
@@ -115,10 +102,6 @@ __weak void Key_Act3(void)
 
 }
 __weak void Key_Act4(void)
-{
-
-}
-__weak void Key_Act5(void)
 {
 
 }

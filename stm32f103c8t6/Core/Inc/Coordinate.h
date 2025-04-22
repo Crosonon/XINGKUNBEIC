@@ -25,6 +25,7 @@ typedef struct
     Pixel_Point origin_point;
     Pixel_Point Calib_Point[4];
     Pixel_Point Cam_Point;
+    FunctionalState Motor_Switch;
 } SystemParams;
 
 typedef struct 
@@ -60,6 +61,7 @@ void Coordinate_Init(void);
 Pixel_Point mm_to_Pixel(mm_Point mm_point);
 mm_Point Pixel_to_mm(Pixel_Point pix_point);
 float absDis(mm_Point dis2d);
+uint8_t CheckUpdate_Del(void);
 
 
 #endif

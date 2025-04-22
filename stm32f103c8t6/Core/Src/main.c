@@ -24,7 +24,6 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-#include "Coordinate.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -34,6 +33,7 @@
 #include "KEY.h"
 #include "Menu.h"
 #include "JOYSTICK.h"
+#include "Coordinate.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -134,23 +134,25 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 //tim1回调，10ms触发一次，设定电机转动
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-  static uint16_t tim_i = 0;
+
   if (htim -> Instance == TIM1)
   {
     //10ms触发一次
     
     //更新Del_mm
-    Pixel_Point Del_Pix = {
-      Del_Pix.x = laser.Set_Pix.x - laser.Now_Pix.x,
-      Del_Pix.y = laser.Set_Pix.y - laser.Now_Pix.y,
-    };
-    laser.Del_mm = Pixel_to_mm(Del_Pix);
+    CheckUpdate_Del();
 
-    tim_i += 1;
+    static uint16_t tim_i = 0;
     if(tim_i == 100)
     {
       tim_i = 0;
+
     }
+    else tim_i ++;
+  }
+  if (htim -> Instance == TIM3)
+  {
+
   }
 }
 /* USER CODE END 0 */
@@ -191,22 +193,26 @@ int main(void)
   MX_TIM2_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
   // HAL_ADC_Start_DMA(&hadc1, adcData, 3);
   HAL_ADCEx_Calibration_Start(&hadc1);
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adcData, 3);
   HAL_TIM_Base_Start_IT(&htim1);
+  HAL_TIM_Base_Start_IT(&htim3);
   HAL_UART_Receive_IT(&huart1, &rx_data, 1);
   OLED_Init();
-  MOTOR_Init();
+  Motor_Init();
   Menu_Init();
 
   /* USER CODE END 2 */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
     /* USER CODE END WHILE */
+
     /* USER CODE BEGIN 3 */
     KEY_Act(KEY_GetNum());
     ADC_Update();
