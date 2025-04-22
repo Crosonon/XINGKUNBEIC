@@ -32,7 +32,7 @@
 #include "OLED.h"
 #include "MOTOR.h"
 #include "KEY.h"
-#include "MENU.h"
+#include "Menu.h"
 #include "JOYSTICK.h"
 /* USER CODE END Includes */
 
@@ -107,13 +107,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
           uart1_rx_flag = 1;
           if (uart1_rx_mode == 0)//写入pixnow
           {
-            Pixel_Now.x = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
-            Pixel_Now.y = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
+            laser.Now_Pix.x = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
+            laser.Now_Pix.y = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
           }
           else if (uart1_rx_mode == 1)//写入pixset
           {
-            Pixel_Set.x = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
-            Pixel_Set.y = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
+            sys_set.Cam_Point.x = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
+            sys_set.Cam_Point.y = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
           }
           uart1_rx_mode = 0;
         } 
@@ -138,10 +138,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim -> Instance == TIM1)
   {
     //10ms触发一次
-    //更新x和y，以及更新disdel
-    Pixel_Del.x = Pixel_Set.x - Pixel_Now.x;
-    Pixel_Del.y = Pixel_Set.y - Pixel_Now.y;
-    Dis_Del = Pixel_to_cm(Pixel_Del);
+    
+    //更新Del_mm
+    Pixel_Point Del_Pix = {
+      Del_Pix.x = laser.Set_Pix.x - laser.Now_Pix.x,
+      Del_Pix.y = laser.Set_Pix.y - laser.Now_Pix.y,
+    };
+    laser.Del_mm = Pixel_to_mm(Del_Pix);
+
     tim_i += 1;
     if(tim_i == 100)
     {
@@ -195,7 +199,7 @@ int main(void)
   HAL_UART_Receive_IT(&huart1, &rx_data, 1);
   OLED_Init();
   MOTOR_Init();
-  MENU_Init();
+  Menu_Init();
 
   /* USER CODE END 2 */
   /* Infinite loop */
@@ -206,12 +210,12 @@ int main(void)
     /* USER CODE BEGIN 3 */
     KEY_Act(KEY_GetNum());
     ADC_Update();
-    MENU_PageShow();
+    Menu_PageShow();
 
-    if(absDis(Dis_Del) > 1)//如果总距离小于1
-    {
-      MOTOR_Move(&Dis_Del);//移动一段距离
-    }
+    // if(absDis(Dis_Del) > 1)//如果总距离小于1
+    // {
+    //   MOTOR_Move(&Dis_Del);//移动一段距离
+    // }
   }
   /* USER CODE END 3 */
 }

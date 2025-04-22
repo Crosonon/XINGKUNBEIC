@@ -1,19 +1,20 @@
-#include "MENU.h"
+#include "Menu.h"
 #include "OLED.h"
 #include "KEY.h"
 #include "MOTOR.h"
 #include "Coordinate.h"
 
-static uint8_t MENU_Cursor = 1;
-static Menu_Page MENU_CurrentPage = Page_Main;
+static Menu_State menu = {
+    .Cursor = 1,
+    .Page = Page_Main,
+};
 
-extern MOTOR_State MOTOR_State_Now;
 extern float VoltCH2;
 
 
-void MENU_Init(void)
+void Menu_Init(void)
 {
-    MENU_PageInit(Page_Main);
+    Menu_PageInit(Page_Main);
 }
 
 
@@ -31,10 +32,10 @@ k4返回
 第三页内容（录入点）：右上，左上，左下，右下
 
 */
-void MENU_PageInit(Menu_Page Page)
+void Menu_PageInit(Menu_Page Page)
 {
     OLED_Clear();
-    MENU_CurrentPage = Page;
+    menu.Page = Page;
 
     switch (Page)
     {
@@ -42,51 +43,51 @@ void MENU_PageInit(Menu_Page Page)
             OLED_ShowString(1,1,"Motor:");
             OLED_ShowString(2,1,"Volt :");
             OLED_ShowString(3,1,"Mode :");
-            MENU_Cursor = 0;
+            menu.Cursor = 0;
             break;
         case Page_setting:
             OLED_ShowString(1,1,"Corner");
             OLED_ShowString(2,1,"Origin");
             OLED_ShowString(3,1,"Frame");
             OLED_ShowString(4,1,"A4");
-            MENU_CursorMove(1);
+            Menu_CursorMove(1);
             break;
-        case Page_Points:
+        case Page_Calib:
             OLED_ShowString(1,1,"RU1:    ,    ");
             OLED_ShowString(2,1,"LU2:    ,    ");
             OLED_ShowString(3,1,"LD3:    ,    ");
             OLED_ShowString(4,1,"RD4:    ,    ");
-            MENU_CursorMove(1);
+            Menu_CursorMove(1);
             break;
     }
 }
 
-void MENU_PageShow(void)
+void Menu_PageShow(void)
 {
-    switch (MENU_CurrentPage)
+    switch (menu.Page)
     {
         case Page_Main:
-            OLED_ShowString(1,7,(MOTOR_State_Now == Motor_On) ? "On" : "OFF");
+            // OLED_ShowString(1,7,(MOTOR_State_Now == Motor_On) ? "On" : "OFF");//这里要定义一个变量接收电机总开关的情况
             OLED_ShowFloat(2,7,VoltCH2);
             break;
         case Page_setting:
             /* code */
             break;
-        case Page_Points:
+        case Page_Calib:
             for(uint8_t i = 0; i < 4; i ++)
             {
-                if(sys_set.Pixel_Corner_Set[i].x)
+                if(sys_set.Calib_Point[i].x)
                 {
-                    OLED_ShowNum(i + 1, 5, sys_set.Pixel_Corner_Set[i].x, 4);
+                    OLED_ShowNum(i + 1, 5, sys_set.Calib_Point[i].x, 4);
                 }
                 else
                 {
                     OLED_ShowString(i + 1, 6, "x");
                     OLED_ShowNum(i + 1, 7, i + 1, 1);
                 }
-                if(sys_set.Pixel_Corner_Set[i].y)
+                if(sys_set.Calib_Point[i].y)
                 {
-                    OLED_ShowNum(i + 1, 10, sys_set.Pixel_Corner_Set[i].y, 4);
+                    OLED_ShowNum(i + 1, 10, sys_set.Calib_Point[i].y, 4);
                 }
                 else
                 {
@@ -98,13 +99,13 @@ void MENU_PageShow(void)
     }
 }
 
-uint8_t MENU_CursorMove(uint8_t Cursor_Set)
+uint8_t Menu_CursorMove(uint8_t Cursor_Set)
 {
-    OLED_ShowChar(MENU_Cursor, 16, ' ');
-    MENU_Cursor = (MENU_Cursor == 4) ? 1 : (MENU_Cursor + 1);
-    MENU_Cursor = (Cursor_Set == 0) ? MENU_Cursor : Cursor_Set;
-    OLED_ShowChar(MENU_Cursor, 16, '<');
-    return MENU_Cursor;
+    OLED_ShowChar(menu.Cursor, 16, ' ');
+    menu.Cursor = (menu.Cursor == 4) ? 1 : (menu.Cursor + 1);
+    menu.Cursor = (Cursor_Set == 0) ? menu.Cursor : Cursor_Set;
+    OLED_ShowChar(menu.Cursor, 16, '<');
+    return menu.Cursor;
 }
 
 /*
@@ -112,16 +113,16 @@ uint8_t MENU_CursorMove(uint8_t Cursor_Set)
 */
 void Key_Act1(void)//
 {
-    switch (MENU_CurrentPage)
+    switch (menu.Page)
     {
         case Page_Main:
-            MENU_PageInit(Page_setting);
+            Menu_PageInit(Page_setting);
             break;
         case Page_setting:
-            switch (MENU_Cursor)
+            switch (menu.Cursor)
             {
             case 1:
-                MENU_PageInit(Page_Points);
+                Menu_PageInit(Page_Calib);
                 break;
             case 2:
                 /* 回到原点 */
@@ -134,13 +135,13 @@ void Key_Act1(void)//
                 break;
             }
             break;
-        case Page_Points://将sys_set.Pixel_Corner_Set的值写入当前光标位置的值
-            sys_set.Pixel_Corner_Set[MENU_Cursor] = Pixel_Set;
-            Pixel_Set.x = 0;
-            Pixel_Set.y = 0;
+        case Page_Calib://将sys_set.Pixel_Corner_Set的值写入当前光标位置的值
+            sys_set.Calib_Point[menu.Cursor - 1] = sys_set.Cam_Point;
+            sys_set.Cam_Point.x = 0;
+            sys_set.Cam_Point.y = 0;
             for(uint8_t i = 0; i < 4; i ++)
             {
-                if (sys_set.Pixel_Corner_Set[i].x == 0) break;
+                if (sys_set.Calib_Point[i].x == 0) break;
                 Coordinate_Init();
             }
             break;
@@ -151,9 +152,9 @@ void Key_Act1(void)//
 */
 void Key_Act2(void)
 {
-    if (MENU_CurrentPage != Page_Main)
+    if (menu.Page != Page_Main)
     {
-        MENU_CursorMove(0);
+        Menu_CursorMove(0);
     }
 }
 /*
@@ -168,18 +169,18 @@ void Key_Act3(void)
 */
 void Key_Act4(void)
 {
-    switch (MENU_CurrentPage)
+    switch (menu.Page)
     {
     case Page_Main:
         /* 啥也不干 */
         break;
     
     case Page_setting:
-        MENU_PageInit(Page_Main);
+        Menu_PageInit(Page_Main);
         break;
     
-    case Page_Points:
-        MENU_PageInit(Page_setting);
+    case Page_Calib:
+        Menu_PageInit(Page_setting);
         break;
     }
 }
