@@ -34,6 +34,7 @@
 #include "Menu.h"
 #include "JOYSTICK.h"
 #include "Coordinate.h"
+#include "queue.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -112,8 +113,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
           }
           else if (uart1_rx_mode == 1)//写入pixset
           {
-            sys_set.Cam_Point.x = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
-            sys_set.Cam_Point.y = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
+            // sys_set.Cam_Point.x = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
+            // sys_set.Cam_Point.y = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
           }
           uart1_rx_mode = 0;
         } 
@@ -154,11 +155,24 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   {
     //1ms
     //给两个电机设定方向，并检测是否到达,如果到达了会给两个电机置stop，下面不会动
-    laser.Arrive_flag = !Motor_Dir_Set(&motor_1L, &motor_2H, laser.Del_mm);
+    sys_set.Flag.Arrive = !Motor_Dir_Set(&motor_1L, &motor_2H, laser.Del_mm);
     //判断是否走，走一步,并更新电机的位置
     Motor_Update_Position(&motor_1L, &laser.Del_mm.x, Motor_Step_Dis(motor_1L, laser));
     Motor_Update_Position(&motor_2H, &laser.Del_mm.y, Motor_Step_Dis(motor_2H, laser));
 
+    if (sys_set.Flag.Arrive)
+    {
+      //调用下一个点到set，如果65535则结束
+      Pixel_Point point = Point_Queue_Dequeue(&(sys_set.Target_Point));
+      if (point.x == 65535)
+      {
+        sys_set.Flag.End = 1;
+      }
+      else
+      {
+        laser.Set_Pix = point;
+      }
+    }
   }
 }
 /* USER CODE END 0 */
@@ -210,6 +224,9 @@ int main(void)
   Motor_Init();
   Menu_Init();
 
+
+  Point_Queue_Init(&(sys_set.Cam_Point));
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -222,7 +239,6 @@ int main(void)
     KEY_Act(KEY_GetNum());
     ADC_Update();
     Menu_PageShow();
-
 
   }
   /* USER CODE END 3 */

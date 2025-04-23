@@ -6,7 +6,6 @@ Laser_Point_Ctrl laser = {
     .Now_Pix = {0, 0},
     .Set_Pix = {0, 0},
     .Del_mm = {0, 0},
-    .Arrive_flag = 0,
     .correct = {
         .State = DISABLE,
         .h = 1000,
@@ -28,7 +27,24 @@ SystemParams sys_set = {
     .y_pixel_to_mm = 0.1,
     .origin_point = {0, 0},
     .Calib_Point = {{0,0}},
-    .Cam_Point = {0,0},
+    .Cam_Point = {
+        .data = {65535,65535},
+        .front = 0,
+        .rear = -1,
+        .size = 0,
+    },
+    .Target_Point = {
+        .data = {65535,65535},
+        .front = 0,
+        .rear = -1,
+        .size = 0,
+    },
+    .Flag = {
+        .Init = 0,
+        .Arrive = 1,
+        .End = 1,
+        .A4_Set = 0,
+    }
 };
 
 void Coordinate_Init(void)
@@ -53,6 +69,10 @@ void Coordinate_Init(void)
     }
     sys_set.origin_point.x = (uint16_t)(temp.x / 4);
     sys_set.origin_point.y = (uint16_t)(temp.y / 4);
+
+
+
+    sys_set.Flag.Init = 1;
 }
 
 Pixel_Point mm_to_Pixel(mm_Point mm_point)

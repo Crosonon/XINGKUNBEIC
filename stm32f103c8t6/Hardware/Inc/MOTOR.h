@@ -61,7 +61,6 @@ extern Motor_Config motor_2H ;
 void Motor_Init(void);
 uint8_t Motor_Move_Unit(Motor_Config motor);
 uint8_t Motor_Move_MutiUnit(Motor_Config motor, uint16_t times);
-uint8_t Motor_Move_Step(Motor_Config motor);
 
 uint8_t Motor_Update_Position(Motor_Config* motor, float* del, float step_dis);
 

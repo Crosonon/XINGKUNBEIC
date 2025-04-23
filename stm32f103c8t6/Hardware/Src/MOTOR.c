@@ -48,8 +48,7 @@ void Motor_Init(void)
     
 } 
 
-/*新函数：电机移动最小步距unit，移动一步step*/
-
+/*电机移动最小步距unit，移动一步step*/
 uint8_t Motor_Move_Unit(Motor_Config motor)
 {
     //如果不使能、锁定模式、不动，就不走一步
@@ -76,22 +75,15 @@ uint8_t Motor_Move_MutiUnit(Motor_Config motor, uint16_t times)
     }
     return temp;
 }
-
-//速度将有影响
-uint8_t Motor_Move_Step(Motor_Config motor)
-{
-    return Motor_Move_MutiUnit(motor, motor.Speed);
-}
-
-/*
+/**
     @brief 唯一外部调用运动：更新位置，会把电机动一步，然后修正del的值
-    @prama motor 使用的电机
-    @prama del 
-    @prama step_dis 步距，用于修正del
+    @param motor 使用的电机
+    @param del 
+    @param step_dis 步距，用于修正del
 */
 uint8_t Motor_Update_Position(Motor_Config* motor, float* del, float step_dis)
 {
-    if(Motor_Move_Step(*motor))
+    if(Motor_Move_MutiUnit(*motor, motor->Speed))
     {
         switch (motor->Dir)
         {
@@ -151,10 +143,10 @@ float Laser_Correct(Laser_Point_Ctrl laser)
     // laser.correct.Pedal_Pix
     /*
     在减小disdel的时候调用
-如果打开，就算k然后乘上去
-怎么算k？使用循环调用
-先通过系统比例算出点的点距（now-垂足），*系统比例\*积分到k得到大概距离（float），由此算出k
-多用几次是否能矫正？这个要算一下
+    如果打开，就算k然后乘上去
+    怎么算k？使用循环调用
+    先通过系统比例算出点的点距（now-垂足），*系统比例\*积分到k得到大概距离（float），由此算出k
+    多用几次是否能矫正？这个要算一下
     */
     // return pow(((pow(d,2)+(1000000))/1000000),0.5);
 }

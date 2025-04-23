@@ -3,6 +3,7 @@
 #include "KEY.h"
 #include "MOTOR.h"
 #include "Coordinate.h"
+#include "Control.h"
 
 static Menu_State menu = {
     .Cursor = 1,
@@ -67,8 +68,12 @@ void Menu_PageShow(void)
     switch (menu.Page)
     {
         case Page_Main:
-            // OLED_ShowString(1,7,(MOTOR_State_Now == Motor_On) ? "On" : "OFF");//这里要定义一个变量接收电机总开关的情况
+            OLED_ShowString(1,7,(motor_drive_set.Lock == Locked) ? " Lock " : "Unlock");//这里要定义一个变量接收电机总开关的情况
             OLED_ShowFloat(2,7,VoltCH2);
+            OLED_ShowString(3,7,(Current_Mode == Mode_Joystick) ? "Joystick" : 
+                (Current_Mode == Mode_Origin) ? "Origin" : 
+                (Current_Mode == Mode_Square) ? "Square" : 
+                (Current_Mode == Mode_A4Paper) ? "A4Paper" : "None");
             break;
         case Page_setting:
             /* code */
@@ -125,23 +130,24 @@ void Key_Act1(void)//
                 Menu_PageInit(Page_Calib);
                 break;
             case 2:
-                /* 回到原点 */
+                Control_SetMode(Mode_Origin);
+                Menu_PageInit(Page_Main);
                 break;
             case 3:
-                /* 四边框 */
+                Control_SetMode(Mode_Square);
+                Menu_PageInit(Page_Main);
                 break;
             case 4:
-                /* a4 */
+                Control_SetMode(Mode_A4Paper);
+                Menu_PageInit(Page_Main);
                 break;
             }
             break;
         case Page_Calib://将sys_set.Pixel_Corner_Set的值写入当前光标位置的值
-            sys_set.Calib_Point[menu.Cursor - 1] = sys_set.Cam_Point;
-            sys_set.Cam_Point.x = 0;
-            sys_set.Cam_Point.y = 0;
+            sys_set.Calib_Point[menu.Cursor - 1] = Point_Queue_Dequeue(&(sys_set.Cam_Point));
             for(uint8_t i = 0; i < 4; i ++)
             {
-                if (sys_set.Calib_Point[i].x == 0) break;
+                if (sys_set.Calib_Point[i].x == 65535) break;
                 Coordinate_Init();
             }
             break;

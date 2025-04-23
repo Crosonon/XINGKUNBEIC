@@ -174,6 +174,6 @@ void ADC_Update(void)
 {
   JoyxCH0 = adcData[0] * (3.3 / 4096);
   JoyyCH1 = adcData[1] * (3.3 / 4096);
-  VoltCH2 = adcData[2] * (3.3 / 4096);
+  VoltCH2 = adcData[2] * (3.3 / 4096) * 11;
 }
 /* USER CODE END 1 */

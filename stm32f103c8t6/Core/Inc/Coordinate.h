@@ -3,6 +3,18 @@
 #define __COORDINATE_H_
 
 #include "stm32f1xx_hal.h"
+// #include "queue.h"
+
+typedef enum
+{
+    Mode_None,
+    Mode_Origin,
+    Mode_Square,
+    Mode_A4Paper,
+    Mode_Joystick,
+}Control_Mode;
+
+
 
 //二维像素点uint16_t
 typedef struct 
@@ -18,6 +30,24 @@ typedef struct
     float y;
 } mm_Point;
 
+
+typedef struct {
+    Pixel_Point data[16];  // 存储目标点
+    int front;                            // 队头索引
+    int rear;                             // 队尾索引
+    int size;                             // 当前元素数
+} Point_Queue;
+
+//标志位：初始化完毕否，读完本点否，读完所有点否，收到a4纸四个坐标否7
+typedef struct
+{
+    uint8_t Init;//初始化后置1
+    uint8_t Arrive;//读完本点置1
+    uint8_t End;//结束置1
+    uint8_t A4_Set;//得到了置1
+}sys_flag;
+
+
 typedef struct 
 {
     //换算系数
@@ -28,8 +58,11 @@ typedef struct
     //校准点坐标
     Pixel_Point Calib_Point[4];
     //摄像头传来的点
-    Pixel_Point Cam_Point;
-
+    Point_Queue Cam_Point;
+    //目标点队列
+    Point_Queue Target_Point;
+    //系统标志位
+    sys_flag Flag;
 } SystemParams;
 
 typedef struct
