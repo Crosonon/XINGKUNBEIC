@@ -6,7 +6,9 @@
 //电机驱动模块设置，全局变量，需要手动更改
 Motor_Drive_Set motor_drive_set = {
     .Subdivide = 32,
-    .Current = 1.44
+    .Current = 1.44,
+    .Lock = Unlocked,
+    //添加步距
 };
 //下电机使能锁定方向速度
 Motor_Config motor_1L = {
@@ -81,16 +83,87 @@ uint8_t Motor_Move_Step(Motor_Config motor)
     return Motor_Move_MutiUnit(motor, motor.Speed);
 }
 
-//会根据switch的方向更新两个电机的使能情况
-uint8_t Motor_Switch_En(void)
+/*
+    @brief 唯一外部调用运动：更新位置，会把电机动一步，然后修正del的值
+    @prama motor 使用的电机
+    @prama del 
+    @prama step_dis 步距，用于修正del
+*/
+uint8_t Motor_Update_Position(Motor_Config* motor, float* del, float step_dis)
 {
-    sys_set.Motor_Switch = (FunctionalState)HAL_GPIO_ReadPin(Motor_Switch_GPIO_Port, Motor_Switch_Pin);
+    if(Motor_Move_Step(*motor))
+    {
+        switch (motor->Dir)
+        {
+            case Right:
+            case Down:
+                *del -= step_dis;
+                break;
 
-    motor_1L.En = sys_set.Motor_Switch;
-    motor_2H.En = sys_set.Motor_Switch;
+            case Left:
+            case Up:
+                *del += step_dis;
+                break;
 
-    HAL_GPIO_WritePin(motor_1L.Pin_Config.En_Port, motor_1L.Pin_Config.En_Pin, (GPIO_PinState)motor_1L.En);
-    HAL_GPIO_WritePin(motor_2H.Pin_Config.En_Port, motor_2H.Pin_Config.En_Pin, (GPIO_PinState)motor_2H.En);
-
-    return sys_set.Motor_Switch;
+            default:
+                return 0;
+        }
+        return 1;
+    }
+    return 0;
 }
+
+//根据del的大小设定电机方向
+uint8_t Motor_Dir_Set(Motor_Config* motor1, Motor_Config* motor2, mm_Point diedel)
+{
+    if(absDis(diedel) < 10)//如果总距离小于10mm
+    {
+        //到达！
+        motor1->Dir = Stop;
+        motor2->Dir = Stop;
+        return 0;
+    }
+
+    motor1->Dir = (diedel.x > 5) ? Right : (diedel.x < -5) ? Left : Stop;
+    motor2->Dir = (diedel.y > 5) ? Down : (diedel.y < -5) ? Up : Stop;
+    return 1;
+}
+
+//会根据switch的输入更新两个电机的锁定
+uint8_t Motor_Lock_Check(void)
+{
+    motor_drive_set.Lock = (Motor_Lock_State)HAL_GPIO_ReadPin(Motor_Switch_GPIO_Port, Motor_Switch_Pin);
+
+    motor_1L.Lock = motor_drive_set.Lock;
+    motor_2H.Lock = motor_drive_set.Lock;
+
+    // HAL_GPIO_WritePin(motor_1L.Pin_Config.En_Port, motor_1L.Pin_Config.En_Pin, (GPIO_PinState)motor_1L.En);
+    // HAL_GPIO_WritePin(motor_2H.Pin_Config.En_Port, motor_2H.Pin_Config.En_Pin, (GPIO_PinState)motor_2H.En);
+
+    return (uint8_t)motor_drive_set.Lock;
+}
+
+//大于等于1
+float Laser_Correct(Laser_Point_Ctrl laser)
+{
+    if (laser.correct.State == DISABLE) return 1;
+    return 1;
+    // laser.correct.Pedal_Pix
+    /*
+    在减小disdel的时候调用
+如果打开，就算k然后乘上去
+怎么算k？使用循环调用
+先通过系统比例算出点的点距（now-垂足），*系统比例\*积分到k得到大概距离（float），由此算出k
+多用几次是否能矫正？这个要算一下
+    */
+    // return pow(((pow(d,2)+(1000000))/1000000),0.5);
+}
+
+//移动一step的长度（矫正后）
+float Motor_Step_Dis(Motor_Config motor, Laser_Point_Ctrl laser)
+{
+    //步距=垂直距离*角度*矫正系数，角度=速度*3.14/100 /细分
+    float theta = motor.Speed * 3.14 / 100 / motor_drive_set.Subdivide;
+    return laser.correct.h * theta * Laser_Correct(laser);
+}
+

@@ -137,9 +137,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
   if (htim -> Instance == TIM1)
   {
-    //10ms触发一次
+    //10ms
     
-    //更新Del_mm
+    //更新Del_mm(如果set或者now更新了，才会更新del，否则del在这里不更新，只在每次移动的时候改变)
     CheckUpdate_Del();
 
     static uint16_t tim_i = 0;
@@ -152,6 +152,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   }
   if (htim -> Instance == TIM3)
   {
+    //1ms
+    //给两个电机设定方向，并检测是否到达,如果到达了会给两个电机置stop，下面不会动
+    laser.Arrive_flag = !Motor_Dir_Set(&motor_1L, &motor_2H, laser.Del_mm);
+    //判断是否走，走一步,并更新电机的位置
+    Motor_Update_Position(&motor_1L, &laser.Del_mm.x, Motor_Step_Dis(motor_1L, laser));
+    Motor_Update_Position(&motor_2H, &laser.Del_mm.y, Motor_Step_Dis(motor_2H, laser));
 
   }
 }
@@ -195,7 +201,6 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-  // HAL_ADC_Start_DMA(&hadc1, adcData, 3);
   HAL_ADCEx_Calibration_Start(&hadc1);
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adcData, 3);
   HAL_TIM_Base_Start_IT(&htim1);
@@ -218,10 +223,7 @@ int main(void)
     ADC_Update();
     Menu_PageShow();
 
-    // if(absDis(Dis_Del) > 1)//如果总距离小于1
-    // {
-    //   MOTOR_Move(&Dis_Del);//移动一段距离
-    // }
+
   }
   /* USER CODE END 3 */
 }

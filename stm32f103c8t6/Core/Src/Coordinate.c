@@ -6,8 +6,13 @@ Laser_Point_Ctrl laser = {
     .Now_Pix = {0, 0},
     .Set_Pix = {0, 0},
     .Del_mm = {0, 0},
-    .Correct = DISABLE,
-    .Correct_K = 1,
+    .Arrive_flag = 0,
+    .correct = {
+        .State = DISABLE,
+        .h = 1000,
+        .Pedal_Pix = {0,0},
+        .Correct_K = 1,
+    }
 };
 
 Laser_Point_Watch laser_watch = {
@@ -24,7 +29,6 @@ SystemParams sys_set = {
     .origin_point = {0, 0},
     .Calib_Point = {{0,0}},
     .Cam_Point = {0,0},
-    .Motor_Switch = DISABLE,
 };
 
 void Coordinate_Init(void)
@@ -85,8 +89,9 @@ uint8_t CheckUpdate_Del(void)
             Del_Pix.y = laser.Set_Pix.y - laser.Now_Pix.y,
             };
         laser.Del_mm = Pixel_to_mm(Del_Pix);
+        
+        last_Set = laser.Set_Pix;
+        last_Now = laser.Now_Pix;
     }
-    last_Set = laser.Set_Pix;
-    last_Now = laser.Now_Pix;
     return Update;
 }

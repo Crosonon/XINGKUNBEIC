@@ -20,25 +20,45 @@ typedef struct
 
 typedef struct 
 {
+    //换算系数
     float x_pixel_to_mm;
     float y_pixel_to_mm;
+    //原点坐标
     Pixel_Point origin_point;
+    //校准点坐标
     Pixel_Point Calib_Point[4];
+    //摄像头传来的点
     Pixel_Point Cam_Point;
-    FunctionalState Motor_Switch;
+
 } SystemParams;
+
+typedef struct
+{
+    //开关
+    FunctionalState State;
+    //垂直距离
+    float h;
+    //垂足坐标
+    Pixel_Point Pedal_Pix;
+    //比例系数（大于等于1）
+    float Correct_K;
+} Correct;
+
 
 typedef struct 
 {
+    //颜色
     char Colour[5];
+    //看到的位置
     Pixel_Point Now_Pix;
+    //要去的位置
     Pixel_Point Set_Pix;
+    //set-now，向右下为正，单位毫米
     mm_Point Del_mm;
-
-    //矫正
-    FunctionalState Correct;
-    Pixel_Point Pedal_Pix;
-    float Correct_K;
+    //到达标志位，1为到，0为不到
+    uint8_t Arrive_flag;
+    //校准情况
+    Correct correct;
 } Laser_Point_Ctrl;
 
 
