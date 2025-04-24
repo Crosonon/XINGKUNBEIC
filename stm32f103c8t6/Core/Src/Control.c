@@ -2,7 +2,7 @@
 #include "queue.h"
 #include "Coordinate.h"
 
-Control_Mode Current_Mode = Mode_None;
+Control_Mode Current_Mode = Mode_Joystick;
 
 
 
@@ -26,7 +26,6 @@ uint8_t Control_SetMode(Control_Mode Set_Mode)
     switch (Current_Mode)
     {
     case Mode_None:
-        return Mode_None;
         break;
     case Mode_Origin:
         //如果原点不为0
@@ -64,7 +63,7 @@ uint8_t Control_SetMode(Control_Mode Set_Mode)
     //     break;
     }
     sys_set.Flag.End = 0;
-    return Current_Mode;
+    return (uint8_t)Current_Mode;
 }
 
 uint8_t Control_EndMode(void)

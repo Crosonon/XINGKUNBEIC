@@ -22,8 +22,7 @@
 
 /* USER CODE BEGIN 0 */
 uint16_t adcData[3];
-float JoyxCH0;
-float JoyyCH1;
+
 float VoltCH2;
 /* USER CODE END 0 */
 

@@ -35,6 +35,7 @@
 #include "JOYSTICK.h"
 #include "Coordinate.h"
 #include "queue.h"
+#include "Control.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -154,8 +155,25 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim -> Instance == TIM3)
   {
     //1ms
+    //更新锁定信息
+    Motor_Lock_Check();
+    //如果队列已经走完，则直接退出
+    if(sys_set.Flag.End == 1)return;
+
     //给两个电机设定方向，并检测是否到达,如果到达了会给两个电机置stop，下面不会动
-    sys_set.Flag.Arrive = !Motor_Dir_Set(&motor_1L, &motor_2H, laser.Del_mm);
+    //如果是摇杆模式，直接设定还没到达，并设定方向
+    if(Current_Mode == Mode_Joystick)
+    {
+      sys_set.Flag.Arrive = 0;
+      motor_1L.Dir = Joy_Get_X();
+      motor_2H.Dir = Joy_Get_Y();
+      /********************************************************调试代码 */
+      // laser.Del_mm.x = 20;
+      // laser.Del_mm.y = 20;
+    }
+    //否则要更新到达情况和方向
+    else sys_set.Flag.Arrive = !Motor_Dir_Set(&motor_1L, &motor_2H, laser.Del_mm);
+
     //判断是否走，走一步,并更新电机的位置
     Motor_Update_Position(&motor_1L, &laser.Del_mm.x, Motor_Step_Dis(motor_1L, laser));
     Motor_Update_Position(&motor_2H, &laser.Del_mm.y, Motor_Step_Dis(motor_2H, laser));
@@ -164,7 +182,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     {
       //调用下一个点到set，如果65535则结束
       Pixel_Point point = Point_Queue_Dequeue(&(sys_set.Target_Point));
-      if (point.x == 65535)
+      if (point.x == 0xff || point.x == 0)
       {
         sys_set.Flag.End = 1;
       }
@@ -173,6 +191,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         laser.Set_Pix = point;
       }
     }
+/****************************************************************************** */
+    // OLED_ShowString(1,1,"                     ");
   }
 }
 /* USER CODE END 0 */
@@ -214,11 +234,13 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_TIM3_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
   HAL_ADCEx_Calibration_Start(&hadc1);
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adcData, 3);
   HAL_TIM_Base_Start_IT(&htim1);
   HAL_TIM_Base_Start_IT(&htim3);
+  HAL_TIM_Base_Start_IT(&htim4);
   HAL_UART_Receive_IT(&huart1, &rx_data, 1);
   OLED_Init();
   Motor_Init();
@@ -239,6 +261,13 @@ int main(void)
     ADC_Update();
     Menu_PageShow();
 
+    //****调试代码**************************************** */
+    if(Joy_Get_Y() == Up)
+    {
+      motor_2H.Dir = Up;
+      Motor_Move_Unit(motor_2H);
+    }
+    Motor_Move_Unit(motor_2H);
   }
   /* USER CODE END 3 */
 }

@@ -3,6 +3,8 @@
 #include "gpio.h"
 #include "Coordinate.h"
 
+extern void OLED_ShowString(uint8_t y, uint8_t x, char str[]);
+
 //电机驱动模块设置，全局变量，需要手动更改
 Motor_Drive_Set motor_drive_set = {
     .Subdivide = 32,
@@ -45,12 +47,23 @@ Motor_Config motor_2H = {
 
 void Motor_Init(void)
 {
-    
+    motor_1L.En = ENABLE;
+    motor_2H.En = ENABLE;
+    HAL_GPIO_WritePin(motor_1L.Pin_Config.En_Port, motor_1L.Pin_Config.En_Pin, (GPIO_PinState)motor_1L.En);
+    HAL_GPIO_WritePin(motor_2H.Pin_Config.En_Port, motor_2H.Pin_Config.En_Pin, (GPIO_PinState)motor_2H.En);
 } 
 
 /*电机移动最小步距unit，移动一步step*/
 uint8_t Motor_Move_Unit(Motor_Config motor)
 {
+    /******************************************************************** */
+    // if((motor.En == DISABLE)) return 0;
+    // OLED_ShowString(1,1,"                     ");
+    // if(motor.Lock == Locked) return 0;
+    // OLED_ShowString(2,1,"                     ");//到这里
+    // if((motor.Dir == Stop)) return 0;
+    // OLED_ShowString(3,1,"                     ");
+        /******************************************************************** */
     //如果不使能、锁定模式、不动，就不走一步
     if((motor.En == DISABLE) || (motor.Lock == Locked) || (motor.Dir == Stop)) return 0;
 
@@ -61,7 +74,9 @@ uint8_t Motor_Move_Unit(Motor_Config motor)
     //给个脉冲
     HAL_GPIO_WritePin(motor.Pin_Config.Step_Port, motor.Pin_Config.Step_Pin, GPIO_PIN_RESET);
     HAL_GPIO_WritePin(motor.Pin_Config.Step_Port, motor.Pin_Config.Step_Pin, GPIO_PIN_SET);
-
+    /******************************************************************** */
+    // OLED_ShowString(4,1,"                     ");
+        /******************************************************************** */
     return 1;
 }
 
@@ -108,7 +123,7 @@ uint8_t Motor_Update_Position(Motor_Config* motor, float* del, float step_dis)
 //根据del的大小设定电机方向
 uint8_t Motor_Dir_Set(Motor_Config* motor1, Motor_Config* motor2, mm_Point diedel)
 {
-    if(absDis(diedel) < 10)//如果总距离小于10mm
+    if(absDis(diedel) < 9)//如果总距离小于9mm
     {
         //到达！
         motor1->Dir = Stop;
@@ -116,8 +131,8 @@ uint8_t Motor_Dir_Set(Motor_Config* motor1, Motor_Config* motor2, mm_Point diede
         return 0;
     }
 
-    motor1->Dir = (diedel.x > 5) ? Right : (diedel.x < -5) ? Left : Stop;
-    motor2->Dir = (diedel.y > 5) ? Down : (diedel.y < -5) ? Up : Stop;
+    motor1->Dir = (diedel.x > 10) ? Right : (diedel.x < -10) ? Left : Stop;
+    motor2->Dir = (diedel.y > 10) ? Down : (diedel.y < -10) ? Up : Stop;
     return 1;
 }
 
@@ -128,9 +143,6 @@ uint8_t Motor_Lock_Check(void)
 
     motor_1L.Lock = motor_drive_set.Lock;
     motor_2H.Lock = motor_drive_set.Lock;
-
-    // HAL_GPIO_WritePin(motor_1L.Pin_Config.En_Port, motor_1L.Pin_Config.En_Pin, (GPIO_PinState)motor_1L.En);
-    // HAL_GPIO_WritePin(motor_2H.Pin_Config.En_Port, motor_2H.Pin_Config.En_Pin, (GPIO_PinState)motor_2H.En);
 
     return (uint8_t)motor_drive_set.Lock;
 }

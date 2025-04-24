@@ -5,6 +5,7 @@
 #include "Coordinate.h"
 #include "Control.h"
 #include "queue.h"
+#include "JOYSTICK.h"
 
 static Menu_State menu = {
     .Cursor = 1,
@@ -50,12 +51,12 @@ void Menu_PageInit(Menu_Page Page)
         OLED_ShowString(4, 1, "Time :");
         menu.Cursor = 0;
         break;
-
+        
         case Page_Main2:
         OLED_ShowString(1, 1, "Set:    ,    ");
         OLED_ShowString(2, 1, "Now:    ,    ");
-        OLED_ShowString(3, 1, "Joy:");//这里要去写joy的函数，到时候直接显示上下左右
-        OLED_ShowString(4, 1, "SR4:          m");
+        OLED_ShowString(3, 1, "Joy:    ,    ");//这里要去写joy的函数，到时候直接显示上下左右
+        OLED_ShowString(4, 1, "SR4:        m");
         menu.Cursor = 0;
         break;
 
@@ -140,7 +141,8 @@ void Menu_PageShow(void)
         OLED_ShowNum(2, 5, laser.Now_Pix.x, 4);
         OLED_ShowNum(2, 10, laser.Now_Pix.y, 4);
         //摇杆情况
-        OLED_ShowString(3, 5, "?");
+        OLED_ShowString(3, 5, (Joy_Get_X() == Left) ? "Left" : (Joy_Get_X() == Right) ? "Righ" : " Mid");
+        OLED_ShowString(3, 10, (Joy_Get_Y() == Up) ? " Up " : (Joy_Get_Y() == Down) ? "Down" : " Mid");
         //超声波
         OLED_ShowFloat(4, 5, 1);
         break;
@@ -282,6 +284,9 @@ void Key_Act1(void)//
             Menu_PageInit(Page_Main1);
             break;
         }
+        //把到达情况置0
+        sys_set.Flag.Arrive = 0;
+        sys_set.Flag.End = 0;
         break;
 
         case Page_set2:
