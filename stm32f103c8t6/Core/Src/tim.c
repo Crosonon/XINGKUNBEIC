@@ -146,7 +146,7 @@ void MX_TIM3_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN TIM3_Init 2 */
-
+//  htim3.Init.Period = 10000-1;
   /* USER CODE END TIM3_Init 2 */
 
 }

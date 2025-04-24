@@ -3,7 +3,10 @@
 #include "gpio.h"
 #include "Coordinate.h"
 
-extern void OLED_ShowString(uint8_t y, uint8_t x, char str[]);
+
+
+#include "OLED.h"
+
 
 //电机驱动模块设置，全局变量，需要手动更改
 Motor_Drive_Set motor_drive_set = {
@@ -56,14 +59,6 @@ void Motor_Init(void)
 /*电机移动最小步距unit，移动一步step*/
 uint8_t Motor_Move_Unit(Motor_Config motor)
 {
-    /******************************************************************** */
-    // if((motor.En == DISABLE)) return 0;
-    // OLED_ShowString(1,1,"                     ");
-    // if(motor.Lock == Locked) return 0;
-    // OLED_ShowString(2,1,"                     ");//到这里
-    // if((motor.Dir == Stop)) return 0;
-    // OLED_ShowString(3,1,"                     ");
-        /******************************************************************** */
     //如果不使能、锁定模式、不动，就不走一步
     if((motor.En == DISABLE) || (motor.Lock == Locked) || (motor.Dir == Stop)) return 0;
 
@@ -74,9 +69,7 @@ uint8_t Motor_Move_Unit(Motor_Config motor)
     //给个脉冲
     HAL_GPIO_WritePin(motor.Pin_Config.Step_Port, motor.Pin_Config.Step_Pin, GPIO_PIN_RESET);
     HAL_GPIO_WritePin(motor.Pin_Config.Step_Port, motor.Pin_Config.Step_Pin, GPIO_PIN_SET);
-    /******************************************************************** */
-    // OLED_ShowString(4,1,"                     ");
-        /******************************************************************** */
+
     return 1;
 }
 
@@ -98,7 +91,8 @@ uint8_t Motor_Move_MutiUnit(Motor_Config motor, uint16_t times)
 */
 uint8_t Motor_Update_Position(Motor_Config* motor, float* del, float step_dis)
 {
-    if(Motor_Move_MutiUnit(*motor, motor->Speed))
+    // if(Motor_Move_MutiUnit(*motor, motor->Speed))
+    if(Motor_Move_Unit(*motor))
     {
         switch (motor->Dir)
         {
@@ -137,6 +131,7 @@ uint8_t Motor_Dir_Set(Motor_Config* motor1, Motor_Config* motor2, mm_Point diede
 }
 
 //会根据switch的输入更新两个电机的锁定
+//硬件问题已禁用
 uint8_t Motor_Lock_Check(void)
 {
     motor_drive_set.Lock = (Motor_Lock_State)HAL_GPIO_ReadPin(Motor_Switch_GPIO_Port, Motor_Switch_Pin);

@@ -155,13 +155,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim -> Instance == TIM3)
   {
     //1ms
-    //更新锁定信息
-    Motor_Lock_Check();
+    //更新锁定信息,pa12
+    // Motor_Lock_Check();
     //如果队列已经走完，则直接退出
     if(sys_set.Flag.End == 1)return;
 
-    //给两个电机设定方向，并检测是否到达,如果到达了会给两个电机置stop，下面不会动
-    //如果是摇杆模式，直接设定还没到达，并设定方向
+    // 给两个电机设定方向，并检测是否到达,如果到达了会给两个电机置stop，下面不会动
+    // 如果是摇杆模式，直接设定还没到达，并设定方向
     if(Current_Mode == Mode_Joystick)
     {
       sys_set.Flag.Arrive = 0;
@@ -175,6 +175,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     else sys_set.Flag.Arrive = !Motor_Dir_Set(&motor_1L, &motor_2H, laser.Del_mm);
 
     //判断是否走，走一步,并更新电机的位置
+    //调试需要先注释了
     Motor_Update_Position(&motor_1L, &laser.Del_mm.x, Motor_Step_Dis(motor_1L, laser));
     Motor_Update_Position(&motor_2H, &laser.Del_mm.y, Motor_Step_Dis(motor_2H, laser));
 
@@ -261,13 +262,6 @@ int main(void)
     ADC_Update();
     Menu_PageShow();
 
-    //****调试代码**************************************** */
-    if(Joy_Get_Y() == Up)
-    {
-      motor_2H.Dir = Up;
-      Motor_Move_Unit(motor_2H);
-    }
-    Motor_Move_Unit(motor_2H);
   }
   /* USER CODE END 3 */
 }
