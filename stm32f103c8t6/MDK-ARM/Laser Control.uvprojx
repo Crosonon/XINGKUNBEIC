@@ -554,13 +554,6 @@
         </Group>
         <Group>
           <GroupName>Drivers/CMSIS</GroupName>
-          <Files>
-            <File>
-              <FileName>system_stm32f1xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Core/Src/system_stm32f1xx.c</FilePath>
-            </File>
-          </Files>
         </Group>
         <Group>
           <GroupName>Application/User/Hardware</GroupName>

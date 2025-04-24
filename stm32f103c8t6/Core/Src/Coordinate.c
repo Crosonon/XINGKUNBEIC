@@ -70,8 +70,6 @@ void Coordinate_Init(void)
     sys_set.origin_point.x = (uint16_t)(temp.x / 4);
     sys_set.origin_point.y = (uint16_t)(temp.y / 4);
 
-
-
     sys_set.Flag.Init = 1;
 }
 

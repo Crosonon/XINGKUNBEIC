@@ -226,7 +226,6 @@ int main(void)
 
 
   Point_Queue_Init(&(sys_set.Cam_Point));
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
