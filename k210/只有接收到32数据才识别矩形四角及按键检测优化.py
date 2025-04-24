@@ -30,7 +30,7 @@ KEY = ybkey()
 pointmanual = []
 
 # 串口初始化
-uart = UART(UART.UART2, 115200, 8, 0, 0, timeout=1000)
+uart = UART(UART.UART2, 9600, 8, 0, 1, timeout=500, read_buf_len=8192)  # 增大缓冲区[7](@ref)
 
 # 颜色阈值
 GREEN_LASER_THRESHOLD = (30, 100, -64, -8, -32, 32)
