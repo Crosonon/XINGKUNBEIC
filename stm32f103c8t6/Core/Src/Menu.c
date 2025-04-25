@@ -44,18 +44,18 @@ void Menu_PageInit(Menu_Page Page)
     switch (Page)
     {
         case Page_Main1:
-        OLED_ShowString(1, 1, "Laser Ctrl     ");
-        OLED_ShowString(1, 12, (laser.Colour[0] == 'R') ? "Red" : "Gre");
-        OLED_ShowString(2, 1, "Volt :");
-        OLED_ShowString(3, 1, "Mode :");
-        OLED_ShowString(4, 1, "Time :");
+        // OLED_ShowString(1, 1, "Laser Ctrl     ");
+        // OLED_ShowString(1, 12, (laser.Colour[0] == 'R') ? "Red" : "Gre");
+        // OLED_ShowString(2, 1, "Volt :");
+        // OLED_ShowString(3, 1, "Mode :");
+        // OLED_ShowString(4, 1, "Time :");
         menu.Cursor = 0;
         break;
         
         case Page_Main2:
         OLED_ShowString(1, 1, "Set:    ,    ");
         OLED_ShowString(2, 1, "Now:    ,    ");
-        OLED_ShowString(3, 1, "Joy:    ,    ");//这里要去写joy的函数，到时候直接显示上下左右
+        OLED_ShowString(3, 1, "Joy:    ,    ");
         OLED_ShowString(4, 1, "SR4:        m");
         menu.Cursor = 0;
         break;
@@ -125,12 +125,30 @@ void Menu_PageShow(void)
     {
         case Page_Main1:
         // OLED_ShowString(1,7,(motor_drive_set.Lock == Locked) ? " Lock " : "Unlock");//这里要定义一个变量接收电机总开关的情况
-        OLED_ShowFloat(2,7,VoltCH2);
-        OLED_ShowString(3,7,(Current_Mode == Mode_Joystick) ? "Joystick" : 
-            (Current_Mode == Mode_Origin) ? "Origin" : 
-            (Current_Mode == Mode_Square) ? "Square" : 
-            (Current_Mode == Mode_A4Paper) ? "A4Paper" : "None");
-        OLED_ShowFloat(4, 7, 0);//计时还没写
+        // OLED_ShowFloat(2,7,VoltCH2);
+        // OLED_ShowString(3,7,(Current_Mode == Mode_Joystick) ? "Joystick" : 
+        //     (Current_Mode == Mode_Origin) ? "Origin" : 
+        //     (Current_Mode == Mode_Square) ? "Square" : 
+        //     (Current_Mode == Mode_A4Paper) ? "A4Paper" : "None");
+        // OLED_ShowFloat(4, 7, 0);//计时还没写
+
+        //以下为调试代码
+        // OLED_Clear();
+        OLED_ShowFloat(1,1,laser.Del_mm.x);
+        OLED_ShowFloat(1,9,laser.Del_mm.y);
+
+        OLED_ShowNum(2,1,sys_set.Flag.Init,1);
+        OLED_ShowNum(2,3,sys_set.Flag.End,1);
+        OLED_ShowNum(2,5,sys_set.Flag.Arrive,1);
+        OLED_ShowNum(2,7,sys_set.Flag.A4_Set,1);
+
+        OLED_ShowString(3, 1, (motor_1L.Dir == Left) ? "Left" : (motor_1L.Dir == Right) ? "Righ" : " Mid");
+        OLED_ShowString(3, 6, (motor_2H.Dir == Up) ? " Up " : (motor_2H.Dir == Down) ? "Down" : " Mid");
+        
+
+        OLED_ShowNum(4, 5, laser.Set_Pix.x, 4);
+        OLED_ShowNum(4, 10, laser.Set_Pix.y, 4);
+
         break;
 
         case Page_Main2:
@@ -311,7 +329,7 @@ void Key_Act1(void)//
         break;
 
         case Page_Square:
-        //这里要改，改成发送数据给k210
+        //这里要改，改成等几秒钟
         /************************************************************************************************************************* */
         for(uint8_t i = 0; i < 4; i ++)
         {

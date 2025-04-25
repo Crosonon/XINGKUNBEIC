@@ -99,17 +99,20 @@ uint8_t CheckUpdate_Del(void)
 {
     static Pixel_Point last_Set;
     static Pixel_Point last_Now;
-    uint8_t Update = ((last_Now.x - laser.Now_Pix.x) | (last_Now.y - laser.Now_Pix.y)) | ((last_Set.x - laser.Set_Pix.x) | (last_Set.y - laser.Set_Pix.y));
+    
+    uint8_t Update = (last_Now.x != laser.Now_Pix.x || last_Now.y != laser.Now_Pix.y || last_Set.x != laser.Set_Pix.x || last_Set.y != laser.Set_Pix.y);
     if (Update)
     {
         Pixel_Point Del_Pix = {
-            Del_Pix.x = laser.Set_Pix.x - laser.Now_Pix.x,
-            Del_Pix.y = laser.Set_Pix.y - laser.Now_Pix.y,
-            };
+            .x = laser.Set_Pix.x - laser.Now_Pix.x,
+            .y = laser.Set_Pix.y - laser.Now_Pix.y
+        };
         laser.Del_mm = Pixel_to_mm(Del_Pix);
         
-        last_Set = laser.Set_Pix;
-        last_Now = laser.Now_Pix;
+        last_Set.x = laser.Set_Pix.x;
+        last_Set.y = laser.Set_Pix.y;
+        last_Now.x = laser.Now_Pix.x;
+        last_Now.y = laser.Now_Pix.y;
     }
     return Update;
 }

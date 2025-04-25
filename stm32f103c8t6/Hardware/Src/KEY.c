@@ -2,6 +2,8 @@
 #include "gpio.h"
 #include "KEY.h"
 
+
+
 void KEY_Init(void);
 
 uint8_t KEY_GetNum(void)
@@ -38,7 +40,15 @@ uint8_t KEY_GetNum(void)
         while(HAL_GPIO_ReadPin(Key4_GPIO_Port, Key4_Pin) == 0);
         HAL_Delay(20);
         Key_Num = 4;
-    }
+    }    
+
+    // if(HAL_GPIO_ReadPin(SW1_GPIO_Port, SW1_Pin) == 1)
+    // {
+    //     HAL_Delay(20);
+    //     while(HAL_GPIO_ReadPin(SW1_GPIO_Port, SW1_Pin) == 1);
+    //     HAL_Delay(20);
+    //     Key_Num = 5;
+    // }
     
     return Key_Num;
 }
@@ -64,6 +74,11 @@ void KEY_Act(uint8_t Key_Num)
     {
         Key_Act4();
     }
+
+    // if (Key_Num == 5)
+    // {
+    //     Key_Act5();
+    // }
 }
 
 //
@@ -105,3 +120,7 @@ __weak void Key_Act4(void)
 {
 
 }
+// __weak void Key_Act5(void)
+// {
+
+// }

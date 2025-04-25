@@ -19,8 +19,8 @@ typedef enum
 //二维像素点uint16_t
 typedef struct 
 {
-    uint16_t x;
-    uint16_t y;
+    int32_t x;
+    int32_t y;
 } Pixel_Point;
 
 //二维毫米点float

@@ -29,13 +29,24 @@ uint8_t Control_SetMode(Control_Mode Set_Mode)
         break;
     case Mode_Origin:
         //如果原点不为0
+        Point_Queue_Init(&(sys_set.Target_Point));//这句是添加原点到队列中
         Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.origin_point);
+        // laser.Set_Pix = Point_Queue_Dequeue(&(sys_set.Target_Point));
         break;
     case Mode_Square:
-        for(int i = 0; i < 4; i ++)
+        Point_Queue_Init(&(sys_set.Target_Point));
+        for (int i = 0; i < 4; i++)
         {
-            //一样检测是否0
-            Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[i]);
+            Pixel_Point point = sys_set.Calib_Point[i];
+            if (point.x != 65535 && point.y != 65535)
+            {
+                Point_Queue_Enqueue(&(sys_set.Target_Point), point);
+            }
+            else
+            {
+                // 处理校准点缺失（如重新校准或报警）
+                break;
+            }
         }
         break;
     case Mode_A4Paper:
@@ -55,12 +66,6 @@ uint8_t Control_SetMode(Control_Mode Set_Mode)
     case Mode_Joystick:
         /* code */
         break;
-    // case Mode_Square:
-    //     /* code */
-    //     break;
-    // case Mode_A4Paper:
-    //     /* code */
-    //     break;
     }
     sys_set.Flag.End = 0;
     return (uint8_t)Current_Mode;

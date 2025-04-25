@@ -140,10 +140,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim -> Instance == TIM1)
   {
     //10ms
-    
+    /******************************************************************************************************** */
+    //t是调试代码
     //更新Del_mm(如果set或者now更新了，才会更新del，否则del在这里不更新，只在每次移动的时候改变)
-    CheckUpdate_Del();
-
+    uint8_t t = CheckUpdate_Del();
+    if (t) OLED_ShowNum(3,13,8,1);
+    //以上
     static uint16_t tim_i = 0;
     if(tim_i == 100)
     {
@@ -167,9 +169,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       sys_set.Flag.Arrive = 0;
       motor_1L.Dir = Joy_Get_X();
       motor_2H.Dir = Joy_Get_Y();
-      /********************************************************调试代码 */
-      // laser.Del_mm.x = 20;
-      // laser.Del_mm.y = 20;
+
     }
     //否则要更新到达情况和方向
     else sys_set.Flag.Arrive = !Motor_Dir_Set(&motor_1L, &motor_2H, laser.Del_mm);
@@ -183,7 +183,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     {
       //调用下一个点到set，如果65535则结束
       Pixel_Point point = Point_Queue_Dequeue(&(sys_set.Target_Point));
-      if (point.x == 0xff || point.x == 0)
+      if (point.x > 1000 || point.x == 0)
       {
         sys_set.Flag.End = 1;
       }
@@ -249,6 +249,26 @@ int main(void)
 
 
   Point_Queue_Init(&(sys_set.Cam_Point));
+
+
+    /*无传入的调试信息如下*/
+
+    //用于无初始化的调试
+    //{{290,20},{30,20},{23,216},{294,218}};
+    sys_set.Calib_Point[0].x = 290;
+    sys_set.Calib_Point[0].y = 20;
+    sys_set.Calib_Point[1].x = 30;
+    sys_set.Calib_Point[1].y = 20;
+    sys_set.Calib_Point[2].x = 23;
+    sys_set.Calib_Point[2].y = 216;
+    sys_set.Calib_Point[3].x = 294;
+    sys_set.Calib_Point[3].y = 218;
+
+    Coordinate_Init();
+
+    laser.Now_Pix.x = 200;
+    laser.Now_Pix.y = 200;
+    //
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -261,6 +281,11 @@ int main(void)
     KEY_Act(KEY_GetNum());
     ADC_Update();
     Menu_PageShow();
+
+
+
+    uint8_t t = CheckUpdate_Del();
+    if (t) OLED_ShowNum(3,13,t,1);
 
   }
   /* USER CODE END 3 */
