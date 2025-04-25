@@ -153,31 +153,31 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     {
       tim_i = 0;
 
-      static Pixel_Point last_Set = {0,0};
-      static Pixel_Point last_Now = {0,0};
+      // static Pixel_Point last_Set = {0,0};
+      // static Pixel_Point last_Now = {0,0};
       
-      uint8_t Update = (last_Now.x != laser.Now_Pix.x || last_Now.y != laser.Now_Pix.y /*|| last_Set.x != laser.Set_Pix.x || last_Set.y != laser.Set_Pix.y*/);
-      if (Update)
-      {
-          Pixel_Point Del_Pix = {
-              .x = laser.Set_Pix.x - laser.Now_Pix.x,
-              .y = laser.Set_Pix.y - laser.Now_Pix.y
-          };
+      // uint8_t Update = (last_Now.x != laser.Now_Pix.x || last_Now.y != laser.Now_Pix.y /*|| last_Set.x != laser.Set_Pix.x || last_Set.y != laser.Set_Pix.y*/);
+      // if (Update)
+      // {
+      //     Pixel_Point Del_Pix = {
+      //         .x = laser.Set_Pix.x - laser.Now_Pix.x,
+      //         .y = laser.Set_Pix.y - laser.Now_Pix.y
+      //     };
   
-          OLED_ShowNum(2,1,Del_Pix.x,4);
-          OLED_ShowNum(2,5,Del_Pix.y,4);
+      //     // OLED_ShowNum(2,1,Del_Pix.x,4);
+      //     // OLED_ShowNum(2,5,Del_Pix.y,4);
   
-          laser.Del_mm = Pixel_to_mm(Del_Pix);
+      //     laser.Del_mm = Pixel_to_mm(Del_Pix);
           
   
-          last_Set.x = laser.Set_Pix.x;
-          last_Set.y = laser.Set_Pix.y;
-          last_Now.x = laser.Now_Pix.x;
-          last_Now.y = laser.Now_Pix.y;
-      }
+      //     last_Set.x = laser.Set_Pix.x;
+      //     last_Set.y = laser.Set_Pix.y;
+      //     last_Now.x = laser.Now_Pix.x;
+      //     last_Now.y = laser.Now_Pix.y;
+      // }
   
       // if(Update == 0) OLED_ShowNum(2,11,0,1);
-      if(Update == 1) OLED_ShowNum(2,11,1,1);
+      // if(Update == 1) OLED_ShowNum(2,11,1,1);
       // HAL_Delay(100);//写了这句直接oled不刷新了
     }
     else tim_i ++;
@@ -202,11 +202,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       {
         laser.Set_Pix = point;
         sys_set.Flag.Arrive = 0;
+
+        laser.Del_mm.x = (laser.Set_Pix.x - laser.Now_Pix.x)*sys_set.x_pixel_to_mm;
+        laser.Del_mm.y = (laser.Set_Pix.y - laser.Now_Pix.y)*sys_set.y_pixel_to_mm;
       }
     }
 
     //更新Del_mm(如果set或者now更新了，才会更新del，否则del在这里不更新，只在每次移动的时候改变)
-    CheckUpdate_Del();
+    // CheckUpdate_Del();
     // Motor_Lock_Check();
 
     // 给两个电机设定方向，并检测是否到达,如果到达了会给两个电机置stop，下面不会动
@@ -286,7 +289,7 @@ int main(void)
 
     //用于无初始化的调试
     //{{290,20},{30,20},{23,216},{294,218}};
-    sys_set.Calib_Point[0].x = 290;
+    sys_set.Calib_Point[0].x = 320;
     sys_set.Calib_Point[0].y = 20;
     sys_set.Calib_Point[1].x = 30;
     sys_set.Calib_Point[1].y = 20;
@@ -315,8 +318,8 @@ int main(void)
 
 
 
-    uint8_t t = CheckUpdate_Del();
-    if (t) OLED_ShowNum(3,13,t,1);
+    // uint8_t t = CheckUpdate_Del();
+    // if (t) OLED_ShowNum(3,13,t,1);
 
   }
   /* USER CODE END 3 */

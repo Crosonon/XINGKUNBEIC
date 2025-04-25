@@ -137,6 +137,10 @@ void Menu_PageShow(void)
         OLED_ShowFloat(1,1,laser.Del_mm.x);
         OLED_ShowFloat(1,9,laser.Del_mm.y);
 
+        OLED_ShowFloat(2,1,sys_set.x_pixel_to_mm);
+        OLED_ShowFloat(2,7,sys_set.y_pixel_to_mm);
+
+
         OLED_ShowNum(3,1,sys_set.Flag.Init,1);
         OLED_ShowNum(3,3,sys_set.Flag.End,1);
         OLED_ShowNum(3,5,sys_set.Flag.Arrive,1);
