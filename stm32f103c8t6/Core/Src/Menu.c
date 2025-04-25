@@ -137,13 +137,13 @@ void Menu_PageShow(void)
         OLED_ShowFloat(1,1,laser.Del_mm.x);
         OLED_ShowFloat(1,9,laser.Del_mm.y);
 
-        OLED_ShowNum(2,1,sys_set.Flag.Init,1);
-        OLED_ShowNum(2,3,sys_set.Flag.End,1);
-        OLED_ShowNum(2,5,sys_set.Flag.Arrive,1);
-        OLED_ShowNum(2,7,sys_set.Flag.A4_Set,1);
+        OLED_ShowNum(3,1,sys_set.Flag.Init,1);
+        OLED_ShowNum(3,3,sys_set.Flag.End,1);
+        OLED_ShowNum(3,5,sys_set.Flag.Arrive,1);
+        OLED_ShowNum(3,7,sys_set.Flag.A4_Set,1);
 
-        OLED_ShowString(3, 1, (motor_1L.Dir == Left) ? "Left" : (motor_1L.Dir == Right) ? "Righ" : " Mid");
-        OLED_ShowString(3, 6, (motor_2H.Dir == Up) ? " Up " : (motor_2H.Dir == Down) ? "Down" : " Mid");
+        // OLED_ShowString(3, 1, (motor_1L.Dir == Left) ? "Left" : (motor_1L.Dir == Right) ? "Righ" : " Mid");
+        // OLED_ShowString(3, 6, (motor_2H.Dir == Up) ? " Up " : (motor_2H.Dir == Down) ? "Down" : " Mid");
         
 
         OLED_ShowNum(4, 5, laser.Set_Pix.x, 4);

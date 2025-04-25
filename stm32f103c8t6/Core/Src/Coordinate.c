@@ -42,7 +42,7 @@ SystemParams sys_set = {
     .Flag = {
         .Init = 0,
         .Arrive = 1,
-        .End = 0,
+        .End = 1,
         .A4_Set = 0,
     }
 };

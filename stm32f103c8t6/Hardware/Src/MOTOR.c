@@ -117,7 +117,7 @@ uint8_t Motor_Update_Position(Motor_Config* motor, float* del, float step_dis)
 //根据del的大小设定电机方向
 uint8_t Motor_Dir_Set(Motor_Config* motor1, Motor_Config* motor2, mm_Point diedel)
 {
-    if(absDis(diedel) < 9)//如果总距离小于9mm
+    if(absDis(diedel) < 5)//如果总距离小于9mm
     {
         //到达！
         motor1->Dir = Stop;
@@ -125,8 +125,8 @@ uint8_t Motor_Dir_Set(Motor_Config* motor1, Motor_Config* motor2, mm_Point diede
         return 0;
     }
 
-    motor1->Dir = (diedel.x > 5) ? Right : (diedel.x < -5) ? Left : Stop;
-    motor2->Dir = (diedel.y > 5) ? Down : (diedel.y < -5) ? Up : Stop;
+    motor1->Dir = (diedel.x > 2) ? Right : (diedel.x < -2) ? Left : Stop;
+    motor2->Dir = (diedel.y > 2) ? Down : (diedel.y < -2) ? Up : Stop;
     return 1;
 }
 

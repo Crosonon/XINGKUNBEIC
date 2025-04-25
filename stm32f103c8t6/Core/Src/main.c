@@ -133,7 +133,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   }
 }
 
-//tim1回调，10ms触发一次，设定电机转动
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 
@@ -143,42 +143,52 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     /******************************************************************************************************** */
     //t是调试代码
     //更新Del_mm(如果set或者now更新了，才会更新del，否则del在这里不更新，只在每次移动的时候改变)
-    uint8_t t = CheckUpdate_Del();
-    if (t) OLED_ShowNum(3,13,8,1);
+    // uint8_t t = CheckUpdate_Del();
+    // if (t) OLED_ShowNum(3,13,8,1);
+
+
     //以上
     static uint16_t tim_i = 0;
-    if(tim_i == 100)
+    if(tim_i == 10)
     {
       tim_i = 0;
 
+      static Pixel_Point last_Set = {0,0};
+      static Pixel_Point last_Now = {0,0};
+      
+      uint8_t Update = (last_Now.x != laser.Now_Pix.x || last_Now.y != laser.Now_Pix.y /*|| last_Set.x != laser.Set_Pix.x || last_Set.y != laser.Set_Pix.y*/);
+      if (Update)
+      {
+          Pixel_Point Del_Pix = {
+              .x = laser.Set_Pix.x - laser.Now_Pix.x,
+              .y = laser.Set_Pix.y - laser.Now_Pix.y
+          };
+  
+          OLED_ShowNum(2,1,Del_Pix.x,4);
+          OLED_ShowNum(2,5,Del_Pix.y,4);
+  
+          laser.Del_mm = Pixel_to_mm(Del_Pix);
+          
+  
+          last_Set.x = laser.Set_Pix.x;
+          last_Set.y = laser.Set_Pix.y;
+          last_Now.x = laser.Now_Pix.x;
+          last_Now.y = laser.Now_Pix.y;
+      }
+  
+      // if(Update == 0) OLED_ShowNum(2,11,0,1);
+      if(Update == 1) OLED_ShowNum(2,11,1,1);
+      // HAL_Delay(100);//写了这句直接oled不刷新了
     }
     else tim_i ++;
   }
   if (htim -> Instance == TIM3)
   {
-    //1ms
-    //更新锁定信息,pa12
-    // Motor_Lock_Check();
+    //10ms
     //如果队列已经走完，则直接退出
-    if(sys_set.Flag.End == 1)return;
+    // if(sys_set.Flag.End == 1)return;
 
-    // 给两个电机设定方向，并检测是否到达,如果到达了会给两个电机置stop，下面不会动
-    // 如果是摇杆模式，直接设定还没到达，并设定方向
-    if(Current_Mode == Mode_Joystick)
-    {
-      sys_set.Flag.Arrive = 0;
-      motor_1L.Dir = Joy_Get_X();
-      motor_2H.Dir = Joy_Get_Y();
-
-    }
-    //否则要更新到达情况和方向
-    else sys_set.Flag.Arrive = !Motor_Dir_Set(&motor_1L, &motor_2H, laser.Del_mm);
-
-    //判断是否走，走一步,并更新电机的位置
-    //调试需要先注释了
-    Motor_Update_Position(&motor_1L, &laser.Del_mm.x, Motor_Step_Dis(motor_1L, laser));
-    Motor_Update_Position(&motor_2H, &laser.Del_mm.y, Motor_Step_Dis(motor_2H, laser));
-
+    //调取下一个点（如果刚设置模式，则此时arrive为1，会取刚刚入队的点）
     if (sys_set.Flag.Arrive)
     {
       //调用下一个点到set，如果65535则结束
@@ -186,14 +196,35 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       if (point.x > 1000 || point.x == 0)
       {
         sys_set.Flag.End = 1;
+        Control_SetMode(Mode_Joystick);
       }
       else
       {
         laser.Set_Pix = point;
+        sys_set.Flag.Arrive = 0;
       }
     }
-/****************************************************************************** */
-    // OLED_ShowString(1,1,"                     ");
+
+    //更新Del_mm(如果set或者now更新了，才会更新del，否则del在这里不更新，只在每次移动的时候改变)
+    CheckUpdate_Del();
+    // Motor_Lock_Check();
+
+    // 给两个电机设定方向，并检测是否到达,如果到达了会给两个电机置stop，下面不会动
+    //更新到达情况和方向,如果到了置1,没到置0
+    sys_set.Flag.Arrive = !Motor_Dir_Set(&motor_1L, &motor_2H, laser.Del_mm);
+    // 如果是摇杆模式，直接设定还没到达，并设定方向
+    if(Current_Mode == Mode_Joystick)
+    {
+      // sys_set.Flag.Arrive = 0;
+      motor_1L.Dir = Joy_Get_X();
+      motor_2H.Dir = Joy_Get_Y();
+    }
+
+    //判断是否走，走一步,并更新电机的位置
+    //调试需要先注释了
+    Motor_Update_Position(&motor_1L, &laser.Del_mm.x, Motor_Step_Dis(motor_1L, laser));
+    Motor_Update_Position(&motor_2H, &laser.Del_mm.y, Motor_Step_Dis(motor_2H, laser));
+
   }
 }
 /* USER CODE END 0 */
@@ -266,7 +297,7 @@ int main(void)
 
     Coordinate_Init();
 
-    laser.Now_Pix.x = 200;
+    laser.Now_Pix.x = 100;
     laser.Now_Pix.y = 200;
     //
   /* USER CODE END 2 */
