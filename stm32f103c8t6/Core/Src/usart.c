@@ -205,5 +205,14 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 }
 
 /* USER CODE BEGIN 1 */
-
+/**
+ * @brief 发3字节数据包给k210，使用usart1
+ * @param huart &huart1
+ * @param data 0x00~0x04
+ */
+void UART_Send_Order(uint8_t data)
+{
+  uint8_t packet[3] = {0xFF, data & 0x07, 0xFE};  // 强制限制数据范围
+  HAL_UART_Transmit(&huart1, packet, 3, 10);        // 阻塞发送，超时10ms
+}
 /* USER CODE END 1 */

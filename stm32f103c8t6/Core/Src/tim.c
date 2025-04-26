@@ -190,7 +190,11 @@ void MX_TIM4_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN TIM4_Init 2 */
-
+  htim4.Init.Period = 10000-1;
+  if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
+  {
+    Error_Handler();
+  }
   /* USER CODE END TIM4_Init 2 */
 
 }

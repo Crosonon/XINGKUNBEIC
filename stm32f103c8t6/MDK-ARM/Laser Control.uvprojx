@@ -578,6 +578,11 @@
               <FileType>1</FileType>
               <FilePath>..\Hardware\Src\JOYSTICK.c</FilePath>
             </File>
+            <File>
+              <FileName>BEEP.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Hardware\Src\BEEP.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

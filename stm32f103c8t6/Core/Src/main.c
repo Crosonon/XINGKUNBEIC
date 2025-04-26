@@ -28,6 +28,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include "BEEP.h"
 #include "OLED.h"
 #include "MOTOR.h"
 #include "KEY.h"
@@ -58,6 +59,10 @@
 /* USER CODE BEGIN PV */
 uint8_t rx_data;
 
+//10ms刷新一次
+uint32_t time = 0;
+uint32_t Beep_time = 0;
+uint32_t Wait_time = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -72,9 +77,11 @@ void SystemClock_Config(void);
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) 
 {
   static uint8_t tmp_data;  //临时存储
+  static uint8_t tmp_last_data;  //临时存储上一个
   
   if (huart->Instance == USART1)
   {
+    tmp_last_data = tmp_data;//存储上一个
     tmp_data = rx_data;  //获取数据
     
     switch(uart1_rx_state) 
@@ -89,20 +96,20 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
         break;
         
       case 1:
-        if(tmp_data == 0x00)
-        {
-          uart1_rx_state = 2;
-          uart1_rx_mode = 0;
-        }
-        else if (tmp_data == 0x01)
+        if(tmp_data == 0x01)//a4点
         {
           uart1_rx_state = 2;
           uart1_rx_mode = 1;
         }
+        else if (tmp_data == 0x02)//now点
+        {
+          uart1_rx_state = 2;
+          uart1_rx_mode = 0;
+        }
         break;
 
       case 2:  //接收数据体
-        if(tmp_data == 0xfe) //end
+        if(tmp_data == 0xfe && tmp_last_data == 0xfe) //end
         {
           uart1_rx_state = 0;
           uart1_rx_buffer[uart1_rx_length] = '\0';
@@ -112,10 +119,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
             laser.Now_Pix.x = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
             laser.Now_Pix.y = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
           }
-          else if (uart1_rx_mode == 1)//写入pixset
+          else if (uart1_rx_mode == 1)//a4
           {
-            // sys_set.Cam_Point.x = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
-            // sys_set.Cam_Point.y = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
+            Pixel_Point tem_point;
+            tem_point.x = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
+            tem_point.y = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
+
+            // Point_Queue_Enqueue(&(sys_set.Cam_Point),tem_point);
           }
           uart1_rx_mode = 0;
         } 
@@ -148,6 +158,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     }
     else tim_i ++;
   }
+
   if (htim -> Instance == TIM3)
   {
     //10ms
@@ -190,7 +201,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     //调试需要先注释了
     Motor_Update_Position(&motor_1L, &laser.Del_mm.x, Motor_Step_Dis(motor_1L, laser));
     Motor_Update_Position(&motor_2H, &laser.Del_mm.y, Motor_Step_Dis(motor_2H, laser));
+  }
 
+  if (htim -> Instance == TIM4)
+  {
+    time ++;
+
+    Beep_Update();
   }
 }
 /* USER CODE END 0 */
