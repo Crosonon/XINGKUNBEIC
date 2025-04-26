@@ -10,7 +10,7 @@ void Beep_Request(float t)
 void Beep_Update(void)
 {
     //没设置直接返回
-    if(Beep_time = 0)
+    if(Beep_time == 0)
     {
         return;
     }
