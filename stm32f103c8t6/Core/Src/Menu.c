@@ -188,7 +188,7 @@ void Menu_PageShow(void)
         case Page_Square:
         for(uint8_t i = 0; i < 4; i ++)
         {
-            if(sys_set.Calib_Point[i].x != 0 && sys_set.Calib_Point[i].x != 0xff)
+            if(sys_set.Calib_Point[i].x != 0 && sys_set.Calib_Point[i].x != 65535)
             {
                 OLED_ShowNum(i + 1, 5, sys_set.Calib_Point[i].x, 4);
             }
@@ -197,7 +197,7 @@ void Menu_PageShow(void)
                 OLED_ShowString(i + 1, 6, "x");
                 OLED_ShowNum(i + 1, 7, i + 1, 1);
             }
-            if(sys_set.Calib_Point[i].y != 0 && sys_set.Calib_Point[i].y != 0xff)
+            if(sys_set.Calib_Point[i].y != 0 && sys_set.Calib_Point[i].y != 65535)
             {
                 OLED_ShowNum(i + 1, 10, sys_set.Calib_Point[i].y, 4);
             }
@@ -307,8 +307,7 @@ void Key_Act1(void)//
             break;
         }
         //把到达情况置0
-        sys_set.Flag.Arrive = 0;
-        sys_set.Flag.End = 0;
+        // sys_set.Flag.End = 0;
         break;
 
         case Page_set2:

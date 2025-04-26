@@ -140,45 +140,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim -> Instance == TIM1)
   {
     //10ms
-    /******************************************************************************************************** */
-    //t是调试代码
-    //更新Del_mm(如果set或者now更新了，才会更新del，否则del在这里不更新，只在每次移动的时候改变)
-    // uint8_t t = CheckUpdate_Del();
-    // if (t) OLED_ShowNum(3,13,8,1);
 
-
-    //以上
     static uint16_t tim_i = 0;
     if(tim_i == 10)
     {
       tim_i = 0;
-
-      // static Pixel_Point last_Set = {0,0};
-      // static Pixel_Point last_Now = {0,0};
-      
-      // uint8_t Update = (last_Now.x != laser.Now_Pix.x || last_Now.y != laser.Now_Pix.y /*|| last_Set.x != laser.Set_Pix.x || last_Set.y != laser.Set_Pix.y*/);
-      // if (Update)
-      // {
-      //     Pixel_Point Del_Pix = {
-      //         .x = laser.Set_Pix.x - laser.Now_Pix.x,
-      //         .y = laser.Set_Pix.y - laser.Now_Pix.y
-      //     };
-  
-      //     // OLED_ShowNum(2,1,Del_Pix.x,4);
-      //     // OLED_ShowNum(2,5,Del_Pix.y,4);
-  
-      //     laser.Del_mm = Pixel_to_mm(Del_Pix);
-          
-  
-      //     last_Set.x = laser.Set_Pix.x;
-      //     last_Set.y = laser.Set_Pix.y;
-      //     last_Now.x = laser.Now_Pix.x;
-      //     last_Now.y = laser.Now_Pix.y;
-      // }
-  
-      // if(Update == 0) OLED_ShowNum(2,11,0,1);
-      // if(Update == 1) OLED_ShowNum(2,11,1,1);
-      // HAL_Delay(100);//写了这句直接oled不刷新了
     }
     else tim_i ++;
   }
@@ -203,13 +169,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         laser.Set_Pix = point;
         sys_set.Flag.Arrive = 0;
 
-        laser.Del_mm.x = (laser.Set_Pix.x - laser.Now_Pix.x)*sys_set.x_pixel_to_mm;
-        laser.Del_mm.y = (laser.Set_Pix.y - laser.Now_Pix.y)*sys_set.y_pixel_to_mm;
+        HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
       }
     }
 
-    //更新Del_mm(如果set或者now更新了，才会更新del，否则del在这里不更新，只在每次移动的时候改变)
-    // CheckUpdate_Del();
     // Motor_Lock_Check();
 
     // 给两个电机设定方向，并检测是否到达,如果到达了会给两个电机置stop，下面不会动
@@ -281,6 +244,8 @@ int main(void)
   Motor_Init();
   Menu_Init();
 
+  HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
 
   Point_Queue_Init(&(sys_set.Cam_Point));
 
@@ -312,14 +277,15 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    //按键检测并执行
     KEY_Act(KEY_GetNum());
+    //adc更新电压和摇杆情况
     ADC_Update();
+    //检查set和now的更新，并以此更新del
+    CheckUpdate_Del();
+    //菜单常态显示
     Menu_PageShow();
 
-
-
-    // uint8_t t = CheckUpdate_Del();
-    // if (t) OLED_ShowNum(3,13,t,1);
 
   }
   /* USER CODE END 3 */
