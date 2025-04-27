@@ -28,8 +28,6 @@ sensor.set_auto_whitebal(False)   # 关闭白平衡
 sensor.set_auto_exposure(False, exposure=20000)  # 降低曝光使背景更暗
 sensor.skip_frames(time=2000)
 
-key = ybkey()
-
 # 红色激光LAB阈值（优化后参数）
 RED_LASER_THRESHOLD = (60, 100, 40, 127, -128, 127)
                       #(70, 100,   # L范围（提升亮度下限过滤黑色）
@@ -76,7 +74,7 @@ while True:
         if byte:
             if byte[0] == 0xff and byte[-1] == 0xfe:
                 if trigger_rect == 0:
-                    triger_rect = 1
+                    trigger_rect = 1
                 if trigger_rect == 2 and len(byte) >= 3 and 0 <= int(byte[1]) <= 3:
                      # 发送坐标时补充flag参数
                         uart.write(pack_data(rect_coords[int(byte[1])], 0x01))
