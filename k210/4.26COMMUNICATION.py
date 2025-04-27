@@ -28,7 +28,7 @@ sensor.set_auto_whitebal(False)   # 关闭白平衡
 sensor.set_auto_exposure(False, exposure=20000)  # 降低曝光使背景更暗
 sensor.skip_frames(time=2000)
 
-
+key = ybkey()
 
 # 红色激光LAB阈值（优化后参数）
 RED_LASER_THRESHOLD = (60, 100, 40, 127, -128, 127)
@@ -43,7 +43,7 @@ rx_data_len = 0
 rx_buffer = []
 rx_checksum = 0
 trigger_rect = 0
-rect_coords = None
+rect_coords = []
 
 def pack_data(data, flag):
     """数据打包函数"""
@@ -51,7 +51,7 @@ def pack_data(data, flag):
     footer = 0xFE
     buffer = bytearray([header, flag])
     for num in data:
-        num = max(0, min(num, 255))
+        num = max(0, min(num, 320))
         buffer.append((num >> 8) & 0xFF)
         buffer.append(num & 0xFF)
     buffer.append(footer)
@@ -77,10 +77,10 @@ while True:
             if byte[0] == 0xff and byte[-1] == 0xfe:
                 if trigger_rect == 0:
                     triger_rect = 1
-                if trgger_rect == 2:
+                if trigger_rect == 2 and len(byte) >= 3 and 0 <= int(byte[1]) <= 3:
                      # 发送坐标时补充flag参数
-                        uart.write(pack_data(rect_coords[index][0], 0x01))
-                        uart.write(pack_data(rect_coords[index][1], 0x01))
+                        uart.write(pack_data(rect_coords[int(byte[1])], 0x01))
+                        print('send:', rect_coords[int(byte[1])])
 
     # 矩形检测及发送
     if trigger_rect == 1:
@@ -101,7 +101,6 @@ while True:
 
                     points = sorted(points, key=lambda p: get_angle(p), reverse=True)
 
-                    rect_coords = []
                     # ========== 新增顶点标签绘制 ==========
                     for idx, (x, y) in enumerate(points):
                         rect_coords.append((x, y))
@@ -119,7 +118,7 @@ while True:
                                       mono_space=False,
                                       bg_color=(0,0,255))   # 蓝色背景
                     # ====================================
-        trigger_rect = 2
+            trigger_rect = 2
 
     # 红色激光检测优化
     if current_time - last_laser_time > laser_interval:
