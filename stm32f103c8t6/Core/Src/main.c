@@ -63,6 +63,8 @@ uint8_t rx_data;
 uint32_t time = 0;
 uint32_t Beep_time = 0;
 uint32_t Wait_time = 0;
+
+uint8_t a4_num = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -125,7 +127,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
             tem_point.x = (uart2_rx_buffer[0]<<8) | (uart2_rx_buffer[1]);
             tem_point.y = (uart2_rx_buffer[2]<<8) | (uart2_rx_buffer[3]);
 
-            // Point_Queue_Enqueue(&(sys_set.Cam_Point),tem_point);
+            Point_Queue_Enqueue(&(sys_set.Cam_Point), tem_point);
+            a4_num++;
+            if (a4_num == 4)
+            {
+              sys_set.Flag.A4_Set = 1;
+              a4_num = 0;
+            }
           }
           uart2_rx_mode = 0;
         } 

@@ -75,6 +75,7 @@ while True:
             if byte[0] == 0xff and byte[-1] == 0xfe:
                 if trigger_rect == 0:
                     trigger_rect = 1
+                    print('set Trigger_rect 1')
                 if trigger_rect == 2 and len(byte) >= 3 and 0 <= int(byte[1]) <= 3:
                      # 发送坐标时补充flag参数
                         uart.write(pack_data(rect_coords[int(byte[1])], 0x01))
@@ -116,7 +117,10 @@ while True:
                                       mono_space=False,
                                       bg_color=(0,0,255))   # 蓝色背景
                     # ====================================
-            trigger_rect = 2
+                    trigger_rect = 2
+                    print(rect_coords)
+                    print('set Trigger_rect 2')
+                    break
 
     # 红色激光检测优化
     if current_time - last_laser_time > laser_interval:
