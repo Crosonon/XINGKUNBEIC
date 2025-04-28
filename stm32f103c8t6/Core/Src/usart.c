@@ -21,11 +21,11 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
-volatile uint8_t uart1_rx_flag = 0;  //接收完成标志
-char uart1_rx_buffer[RX_BUFFER_SIZE] = {0};  //接收缓冲区
-uint8_t uart1_rx_length = 0;        //当前接收长度
-uint8_t uart1_rx_state = 0;         //状态机状态
-uint8_t uart1_rx_mode = 0;          //模式，0为实时数据，1为设定数据
+volatile uint8_t uart2_rx_flag = 0;  //接收完成标志
+char uart2_rx_buffer[RX_BUFFER_SIZE] = {0};  //接收缓冲区
+uint8_t uart2_rx_length = 0;        //当前接收长度
+uint8_t uart2_rx_state = 0;         //状态机状态
+uint8_t uart2_rx_mode = 0;          //模式，0为实时数据，1为设定数据
 
 /* USER CODE END 0 */
 
@@ -74,7 +74,7 @@ void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
+  huart2.Init.BaudRate = 9600;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;

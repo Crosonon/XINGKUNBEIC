@@ -73,73 +73,72 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-//uart1回调，收集k210给的数据，存储到x和y
+//uart2回调，收集k210给的数据，存储到x和y
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) 
 {
   static uint8_t tmp_data;  //临时存储
   static uint8_t tmp_last_data;  //临时存储上一个
   
-  if (huart->Instance == USART1)
+  if (huart->Instance == USART2)
   {
     tmp_last_data = tmp_data;//存储上一个
     tmp_data = rx_data;  //获取数据
     
-    switch(uart1_rx_state) 
+    switch(uart2_rx_state) 
     {
       case 0:
         if(tmp_data == 0xff) 
         {
-          uart1_rx_state = 1;
-          uart1_rx_length = 0;
-          uart1_rx_flag = 0;
+          uart2_rx_state = 1;
+          uart2_rx_length = 0;
+          uart2_rx_flag = 0;
         }
         break;
         
       case 1:
         if(tmp_data == 0x01)//a4点
         {
-          uart1_rx_state = 2;
-          uart1_rx_mode = 1;
+          uart2_rx_state = 2;
+          uart2_rx_mode = 1;
         }
         else if (tmp_data == 0x02)//now点
         {
-          uart1_rx_state = 2;
-          uart1_rx_mode = 0;
+          uart2_rx_state = 2;
+          uart2_rx_mode = 0;
         }
         break;
 
       case 2:  //接收数据体
         if(tmp_data == 0xfe && tmp_last_data == 0xfe) //end
         {
-          uart1_rx_state = 0;
-          uart1_rx_buffer[uart1_rx_length] = '\0';
-          uart1_rx_flag = 1;
-          if (uart1_rx_mode == 0)//写入pixnow
+          uart2_rx_state = 0;
+          uart2_rx_buffer[uart2_rx_length] = '\0';
+          uart2_rx_flag = 1;
+          if (uart2_rx_mode == 0)//写入pixnow
           {
-            laser.Now_Pix.x = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
-            laser.Now_Pix.y = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
+            laser.Now_Pix.x = (uart2_rx_buffer[0]<<8) | (uart2_rx_buffer[1]);
+            laser.Now_Pix.y = (uart2_rx_buffer[2]<<8) | (uart2_rx_buffer[3]);
           }
-          else if (uart1_rx_mode == 1)//a4
+          else if (uart2_rx_mode == 1)//a4
           {
             Pixel_Point tem_point;
-            tem_point.x = (uart1_rx_buffer[0]<<8) | (uart1_rx_buffer[1]);
-            tem_point.y = (uart1_rx_buffer[2]<<8) | (uart1_rx_buffer[3]);
+            tem_point.x = (uart2_rx_buffer[0]<<8) | (uart2_rx_buffer[1]);
+            tem_point.y = (uart2_rx_buffer[2]<<8) | (uart2_rx_buffer[3]);
 
             // Point_Queue_Enqueue(&(sys_set.Cam_Point),tem_point);
           }
-          uart1_rx_mode = 0;
+          uart2_rx_mode = 0;
         } 
         else 
         {
-          if(uart1_rx_length < RX_BUFFER_SIZE-1) 
+          if(uart2_rx_length < RX_BUFFER_SIZE-1) 
           { 
-            uart1_rx_buffer[uart1_rx_length++] = tmp_data;
+            uart2_rx_buffer[uart2_rx_length++] = tmp_data;
           }
         }
         break;
     }
-
-    HAL_UART_Receive_IT(&huart1, &rx_data, 1);
+    HAL_UART_Receive_IT(&huart2, &rx_data, 1);
   }
 }
 
@@ -256,7 +255,7 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim1);
   HAL_TIM_Base_Start_IT(&htim3);
   HAL_TIM_Base_Start_IT(&htim4);
-  HAL_UART_Receive_IT(&huart1, &rx_data, 1);
+  HAL_UART_Receive_IT(&huart2, &rx_data, 1);
   OLED_Init();
   Motor_Init();
   Menu_Init();
