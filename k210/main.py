@@ -79,8 +79,6 @@ while True:
                      # 发送坐标时补充flag参数
                         uart.write(pack_data(rect_coords[int(byte[1])], 0x01))
                         #print('send:', rect_coords[int(byte[1])])
-                        trigger_rect = 0
-
 
 
     # 矩形检测及发送
@@ -126,7 +124,7 @@ while True:
                     print('set Trigger_rect 2')
                     break
 
-    if trigger_rect == 0:
+    if trigger_rect == 0 or trigger_rect == 2:
         # 优化后的红色激光检测
         if current_time - last_laser_time > laser_interval:
             # 使用LAB颜色空间进行检测
@@ -156,12 +154,6 @@ while True:
                       print("Laser Sent:", laser_coords)
                       last_send = current_time
     # 定时发送坐标
-
-    if (KEY.is_press()):
-        if trigger_rect == 0:
-           trigger_rect = 1
-        if trigger_rect == 2:
-           trigger_rect = 0
 
 
     lcd.display(img)
