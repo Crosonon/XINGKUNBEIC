@@ -115,6 +115,7 @@ Pixel_Point mm_to_Pixel(mm_Point mm_point);
 mm_Point Pixel_to_mm(Pixel_Point pix_point);
 float absDis(mm_Point dis2d);
 uint8_t CheckUpdate_Del(void);
+Pixel_Point Lerp_Pixel(Pixel_Point p1, Pixel_Point p2, float k);
 
 
 #endif

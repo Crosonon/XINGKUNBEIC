@@ -107,9 +107,7 @@ uint8_t CheckUpdate_Del(void)
             .x = laser.Set_Pix.x - laser.Now_Pix.x,
             .y = laser.Set_Pix.y - laser.Now_Pix.y
         };
-        // laser.Del_mm = Pixel_to_mm(Del_Pix);
-        laser.Del_mm.x = sys_set.x_pixel_to_mm * Del_Pix.x;
-        laser.Del_mm.y = sys_set.y_pixel_to_mm * Del_Pix.y;
+        laser.Del_mm = Pixel_to_mm(Del_Pix);
         
         last_Set.x = laser.Set_Pix.x;
         last_Set.y = laser.Set_Pix.y;
@@ -117,4 +115,18 @@ uint8_t CheckUpdate_Del(void)
         last_Now.y = laser.Now_Pix.y;
     }
     return Update;
+}
+
+/**
+    @brief 
+    @param p1 第一个点
+    @param p2 第二个点
+    @param k  比例系数，在0-1之间，越小则距离点p1更近，0则返回p1
+*/
+Pixel_Point Lerp_Pixel(Pixel_Point p1, Pixel_Point p2, float k)
+{
+    Pixel_Point p;
+    p.x = p1.x * (1 - k) + p2.x * k;
+    p.y = p1.y * (1 - k) + p2.y * k;
+    return p;
 }

@@ -135,13 +135,15 @@ void Menu_PageShow(void)
 
         //以下为调试代码
         OLED_ShowNum(1,1,sys_set.Flag.Arrive,1);
-        OLED_ShowNum(1,5,HAL_GPIO_ReadPin(Beep_GPIO_Port,Beep_Pin),1);
+        Pixel_Point p = Lerp_Pixel(sys_set.Calib_Point[3],sys_set.Calib_Point[2],0.25);
+        OLED_ShowNum(1,3,p.x,3);
+        OLED_ShowNum(1,8,p.y,3);
         OLED_ShowFloat(2,1,laser.Del_mm.x);
         OLED_ShowFloat(2,9,laser.Del_mm.y);
-        OLED_ShowFloat(3,1,sys_set.x_pixel_to_mm);
-        OLED_ShowFloat(3,8,sys_set.y_pixel_to_mm);
-        OLED_ShowNum(4, 5, laser.Set_Pix.x, 4);
-        OLED_ShowNum(4, 10, laser.Set_Pix.y, 4);
+        OLED_ShowNum(3, 5, laser.Set_Pix.x, 4);
+        OLED_ShowNum(3, 10, laser.Set_Pix.y, 4);
+        OLED_ShowString(4, 3, (motor_1L.Dir == Left) ? "Left" : (motor_1L.Dir == Right) ? "Righ" : " Mid");
+        OLED_ShowString(4, 10, (motor_2H.Dir == Up) ? " Up " : (motor_2H.Dir == Down) ? "Down" : " Mid");
 
         // OLED_ShowNum(3,1,sys_set.Flag.Init,1);
         // OLED_ShowNum(3,3,sys_set.Flag.End,1);
@@ -337,6 +339,7 @@ void Key_Act1(void)//
         //还没改完，我先写直接调用了
         sys_set.Calib_Point[menu.Cursor - 1] = laser.Now_Pix;
         Coordinate_Init();
+        Menu_CursorMove(0);
         break;
         
         case Page_Wait:
