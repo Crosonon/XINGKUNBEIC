@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include "Coordinate.h"
 
-#define TARGET_QUEUE_SIZE 16  // 队列容量
+#define TARGET_QUEUE_SIZE 40  // 队列容量
 
 
 // 初始化队列

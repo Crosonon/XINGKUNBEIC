@@ -65,6 +65,7 @@ uint32_t Beep_time = 0;
 uint32_t Wait_time = 0;
 
 uint8_t a4_num = 0;
+static int32_t motort = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -153,11 +154,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-
+  //tim1，10ms，暂时啥也没有
   if (htim -> Instance == TIM1)
   {
     //10ms
-
     static uint16_t tim_i = 0;
     if(tim_i == 10)
     {
@@ -166,16 +166,26 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     else tim_i ++;
   }
 
+  //tim3，10ms，用于查看到达情况，取点，设定方向，走一步
   if (htim -> Instance == TIM3)
   {
     //10ms
     //如果队列已经走完，则直接退出
     // if(sys_set.Flag.End == 1)return;
 
+    //检查set和now的更新，并以此更新del
+    CheckUpdate_Del();
+
     //调取下一个点（如果刚设置模式，则此时arrive为1，会取刚刚入队的点）
-    if (sys_set.Flag.Arrive)
+    if (sys_set.Flag.Arrive == 1)
     {
       //调用下一个点到set，如果65535则结束
+/********************************************************************************************************* */
+// motort = time + 50;
+// motor_1L.Lock = Locked;
+// motor_2H.Lock = Locked;
+/********************************************************************************************************* */
+
       Pixel_Point point = Point_Queue_Dequeue(&(sys_set.Target_Point));
       if (point.x > 1000 || point.x == 0)
       {
@@ -186,8 +196,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       {
         laser.Set_Pix = point;
         sys_set.Flag.Arrive = 0;
-
-        HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
+        Beep_Request(0.1);
       }
     }
 
@@ -205,7 +214,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     }
 
     //判断是否走，走一步,并更新电机的位置
-    //调试需要先注释了
     Motor_Update_Position(&motor_1L, &laser.Del_mm.x, Motor_Step_Dis(motor_1L, laser));
     Motor_Update_Position(&motor_2H, &laser.Del_mm.y, Motor_Step_Dis(motor_2H, laser));
   }
@@ -215,6 +223,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     time ++;
 
     Beep_Update();
+    /********************************************************************************************************* */
+    // if(motort < time){
+    // motor_1L.Lock = Unlocked;
+    // motor_2H.Lock = Unlocked;
+
+    // }
+    /********************************************************************************************************* */
   }
 }
 /* USER CODE END 0 */
@@ -270,6 +285,7 @@ int main(void)
 
   HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
   HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(Beep_GPIO_Port, Beep_Pin, GPIO_PIN_SET);
 
   Point_Queue_Init(&(sys_set.Cam_Point));
 
@@ -278,14 +294,14 @@ int main(void)
 
     //用于无初始化的调试
     //{{290,20},{30,20},{23,216},{294,218}};
-    sys_set.Calib_Point[0].x = 320;
-    sys_set.Calib_Point[0].y = 20;
-    sys_set.Calib_Point[1].x = 30;
-    sys_set.Calib_Point[1].y = 20;
-    sys_set.Calib_Point[2].x = 23;
-    sys_set.Calib_Point[2].y = 216;
-    sys_set.Calib_Point[3].x = 294;
-    sys_set.Calib_Point[3].y = 218;
+    sys_set.Calib_Point[0].x = 262;
+    sys_set.Calib_Point[0].y = 35;
+    sys_set.Calib_Point[1].x = 72;
+    sys_set.Calib_Point[1].y = 34;
+    sys_set.Calib_Point[2].x = 66;
+    sys_set.Calib_Point[2].y = 219;
+    sys_set.Calib_Point[3].x = 255;
+    sys_set.Calib_Point[3].y = 219;
 
     Coordinate_Init();
 
@@ -305,11 +321,10 @@ int main(void)
     KEY_Act(KEY_GetNum());
     //adc更新电压和摇杆情况
     ADC_Update();
-    //检查set和now的更新，并以此更新del
-    CheckUpdate_Del();
     //菜单常态显示
     Menu_PageShow();
 
+    // Control_SetMode(Mode_Origin);
 
   }
   /* USER CODE END 3 */

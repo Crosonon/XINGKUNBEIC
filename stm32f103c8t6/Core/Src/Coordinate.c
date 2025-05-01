@@ -50,15 +50,15 @@ SystemParams sys_set = {
 void Coordinate_Init(void)
 {
     //比例计算
-    sys_set.x_pixel_to_mm = (float)(
+    sys_set.x_pixel_to_mm = (float)500 / ((
         (sys_set.Calib_Point[0].x - sys_set.Calib_Point[1].x) + 
         (sys_set.Calib_Point[3].x - sys_set.Calib_Point[2].x)
-    ) / 2 / 500;
+    ) / 2);
 
-    sys_set.y_pixel_to_mm = (float)(
+    sys_set.y_pixel_to_mm = (float)500 / ((
         (sys_set.Calib_Point[3].y - sys_set.Calib_Point[0].y) + 
         (sys_set.Calib_Point[2].y - sys_set.Calib_Point[1].y)
-    ) / 2 / 500;
+    ) / 2);
 
     //原点设置
     mm_Point temp = {0,0};
@@ -91,7 +91,7 @@ mm_Point Pixel_to_mm(Pixel_Point pix_point)
 
 float absDis(mm_Point dis2d)
 {
-    return powf((powf(dis2d.x, 2) + powf(dis2d.y, 2)), 0.5);
+    return fabs(powf((powf(dis2d.x, 2) + powf(dis2d.y, 2)), 0.5));
 }
 
 
@@ -115,4 +115,18 @@ uint8_t CheckUpdate_Del(void)
         last_Now.y = laser.Now_Pix.y;
     }
     return Update;
+}
+
+/**
+    @brief 
+    @param p1 第一个点
+    @param p2 第二个点
+    @param k  比例系数，在0-1之间，越小则距离点p1更近，0则返回p1
+*/
+Pixel_Point Lerp_Pixel(Pixel_Point p1, Pixel_Point p2, float k)
+{
+    Pixel_Point p;
+    p.x = p1.x * (1 - k) + p2.x * k;
+    p.y = p1.y * (1 - k) + p2.y * k;
+    return p;
 }
