@@ -4,6 +4,7 @@ import time
 import lcd, math
 from machine import UART
 from fpioa_manager import fm
+from modules import ybkey
 # 硬件初始化
 fm.register(8, fm.fpioa.UART2_TX, force=True)
 fm.register(6, fm.fpioa.UART2_RX, force=True)
@@ -15,7 +16,8 @@ lcd.init(freq=15000000)
 lcd.rotation(0)
 lcd.clear()
 
-
+# 按键初始化
+KEY = ybkey()
 
 # 摄像头初始化
 sensor.reset()
@@ -28,11 +30,8 @@ sensor.set_auto_whitebal(False)   # 关闭白平衡
 sensor.set_auto_exposure(False, exposure=20000)  # 降低曝光使背景更暗
 sensor.skip_frames(time=2000)
 
-# 红色激光LAB阈值（优化后参数）
-RED_LASER_THRESHOLD = (60, 100, 40, 127, -128, 127)
-                      #(70, 100,   # L范围（提升亮度下限过滤黑色）
-                      # 45, 80,    # a范围（红色在a通道正值）
-                      #-10, 20)   # b范围（适当放宽）
+# 优化后的红色激光LAB阈值
+RED_LASER_THRESHOLD = (60, 100, 40, 127, -128, 127)  # 优化后的LAB阈值范围
 
 
 # 协议解析状态机变量
@@ -68,7 +67,7 @@ while True:
     current_time = time.ticks_ms()
     laser_coords = None
 
-     # UART协议解析状态机【new,待进一步修改
+     # UART协议解析状态机
     while uart.any():
         byte = uart.read(10)
         if byte:
@@ -79,14 +78,17 @@ while True:
                 if trigger_rect == 2 and len(byte) >= 3 and 0 <= int(byte[1]) <= 3:
                      # 发送坐标时补充flag参数
                         uart.write(pack_data(rect_coords[int(byte[1])], 0x01))
-                        print('send:', rect_coords[int(byte[1])])
+                        #print('send:', rect_coords[int(byte[1])])
+                        trigger_rect = 0
+
+
 
     # 矩形检测及发送
     if trigger_rect == 1:
-        rects = img.find_rects(threshold=5000, roi=(40,30,240,180))
+        rects = img.find_rects(threshold=3500, roi=(40,30,200,150))
         if rects:
             for r in rects:
-                if r.w() > 40 and r.h() > 40:
+                if r.w() > 30 and r.h() > 30:
                     corners = r.corners()
                     points = list(corners)
 
@@ -117,37 +119,51 @@ while True:
                                       mono_space=False,
                                       bg_color=(0,0,255))   # 蓝色背景
                     # ====================================
+                    img.draw_rectangle(r.rect(), color=(255,0,0), thickness=2)
+
                     trigger_rect = 2
                     print(rect_coords)
                     print('set Trigger_rect 2')
                     break
 
-    # 红色激光检测优化
-    if current_time - last_laser_time > laser_interval:
-        blobs = img.find_blobs([RED_LASER_THRESHOLD],
-                            pixels_threshold=15,    # 降低像素阈值
-                            area_threshold=15,      # 减小面积阈值
-                            merge=True,
-                            margin=5)
-        if blobs:
-            max_blob = max(blobs, key=lambda b: (b.area(), -b.y()))
-            laser_coords = (max_blob.cx(), max_blob.cy())
+    if trigger_rect == 0:
+        # 优化后的红色激光检测
+        if current_time - last_laser_time > laser_interval:
+            # 使用LAB颜色空间进行检测
+            blobs = img.find_blobs([RED_LASER_THRESHOLD],
+                                pixels_threshold=15,
+                                area_threshold=15,
+                                merge=True,
+                                margin=5)
 
-            # 增强显示效果
-            img.draw_circle(laser_coords[0], laser_coords[1], 8, color=(255,0,0))
-            img.draw_string(laser_coords[0]+10, laser_coords[1]+10,
-                          "R:({},{})".format(*laser_coords),
-                          color=(255,0,0),
-                          scale=1.5,
-                          bg_color=(0,0,0))
-            last_laser_time = current_time
+            if blobs:
+                # 选择面积最大且位置最靠上的blob
+                max_blob = max(blobs, key=lambda b: (b.area(), -b.y()))
+                laser_coords = (max_blob.cx(), max_blob.cy())
 
+                # 增强显示效果
+                img.draw_circle(laser_coords[0], laser_coords[1], 8, color=(255,0,0))
+                img.draw_string(laser_coords[0]+10, laser_coords[1]+10,
+                              "R:({},{})".format(*laser_coords),
+                              color=(255,0,0),
+                              scale=1.5,
+                              bg_color=(0,0,0))
+                last_laser_time = current_time
+
+                if current_time - last_send >= 200:
+                   if laser_coords:
+                      uart.write(pack_data(laser_coords, 0x02))
+                      print("Laser Sent:", laser_coords)
+                      last_send = current_time
     # 定时发送坐标
-    if current_time - last_send >= 200:
-        if laser_coords:
-            uart.write(pack_data(laser_coords, 0x02))
-            print("Laser Sent:", laser_coords)
-        last_send = current_time
+
+    if (KEY.is_press()):
+        if trigger_rect == 0:
+           trigger_rect = 1
+        if trigger_rect == 2:
+           trigger_rect = 0
+
 
     lcd.display(img)
-    lcd.draw_string(0, 0, "YIBAI", lcd.RED, lcd.WHITE)
+    lcd.draw_string(0, 0, "YIBAI4", lcd.RED, lcd.WHITE)
+    lcd.draw_string(220, 0, "TR:{}".format(trigger_rect), lcd.RED, lcd.WHITE)  # 新增状态显示
