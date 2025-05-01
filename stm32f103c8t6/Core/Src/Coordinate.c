@@ -91,7 +91,7 @@ mm_Point Pixel_to_mm(Pixel_Point pix_point)
 
 float absDis(mm_Point dis2d)
 {
-    return powf((powf(dis2d.x, 2) + powf(dis2d.y, 2)), 0.5);
+    return fabs(powf((powf(dis2d.x, 2) + powf(dis2d.y, 2)), 0.5));
 }
 
 

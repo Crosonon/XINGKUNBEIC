@@ -115,18 +115,24 @@ uint8_t Motor_Update_Position(Motor_Config* motor, float* del, float step_dis)
 }
 
 //根据del的大小设定电机方向
+
 uint8_t Motor_Dir_Set(Motor_Config* motor1, Motor_Config* motor2, mm_Point diedel)
 {
-    if(absDis(diedel) < 5)//如果总距离小于9mm
+    if(absDis(diedel) < 8)//如果总距离小
     {
         //到达！
         motor1->Dir = Stop;
         motor2->Dir = Stop;
+
+        //
+        // HAL_GPIO_WritePin(LED2_GPIO_Port,LED2_Pin,GPIO_PIN_SET);
+        //
         return 0;
     }
+    HAL_GPIO_WritePin(LED2_GPIO_Port,LED2_Pin,GPIO_PIN_RESET);
 
-    motor1->Dir = (diedel.x > 2) ? Right : (diedel.x < -2) ? Left : Stop;
-    motor2->Dir = (diedel.y > 2) ? Down : (diedel.y < -2) ? Up : Stop;
+    motor1->Dir = (diedel.x > 1) ? Right : (diedel.x < -1) ? Left : Stop;
+    motor2->Dir = (diedel.y > 1) ? Down : (diedel.y < -1) ? Up : Stop;
     return 1;
 }
 

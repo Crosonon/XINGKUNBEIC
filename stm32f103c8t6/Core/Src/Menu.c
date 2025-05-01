@@ -15,6 +15,7 @@ static Menu_State menu = {
 uint8_t main3tag = 0;//0队名1人名2学校时间
 
 extern float VoltCH2;
+extern uint32_t time;
 
 void Menu_Init(void)
 {
@@ -133,26 +134,20 @@ void Menu_PageShow(void)
         // OLED_ShowFloat(4, 7, 0);//计时还没写
 
         //以下为调试代码
-        // OLED_Clear();
-        OLED_ShowFloat(1,1,laser.Del_mm.x);
-        OLED_ShowFloat(1,9,laser.Del_mm.y);
-
-        OLED_ShowFloat(2,1,sys_set.x_pixel_to_mm);
-        OLED_ShowFloat(2,7,sys_set.y_pixel_to_mm);
-
+        OLED_ShowNum(1,1,sys_set.Flag.Arrive,1);
+        OLED_ShowFloat(2,1,laser.Del_mm.x);
+        OLED_ShowFloat(2,9,laser.Del_mm.y);
         OLED_ShowNum(3,1,laser.Now_Pix.x,5);
         OLED_ShowNum(3,8,laser.Now_Pix.y,5);
-        // OLED_ShowNum(3,1,sys_set.Flag.Init,1);
-        // OLED_ShowNum(3,3,sys_set.Flag.End,1);
-        // OLED_ShowNum(3,5,sys_set.Flag.Arrive,1);
-        // OLED_ShowNum(3,7,sys_set.Flag.A4_Set,1);
-
-        // OLED_ShowString(3, 1, (motor_1L.Dir == Left) ? "Left" : (motor_1L.Dir == Right) ? "Righ" : " Mid");
-        // OLED_ShowString(3, 6, (motor_2H.Dir == Up) ? " Up " : (motor_2H.Dir == Down) ? "Down" : " Mid");
-        
-
         OLED_ShowNum(4, 5, laser.Set_Pix.x, 4);
         OLED_ShowNum(4, 10, laser.Set_Pix.y, 4);
+        OLED_ShowFloat(1, 3, absDis(laser.Del_mm));
+        if(absDis(laser.Del_mm)<8)OLED_ShowNum(1,9,time,6);
+
+        // OLED_ShowNum(3,1,sys_set.Flag.Init,1);
+        // OLED_ShowNum(3,3,sys_set.Flag.End,1);
+        // OLED_ShowNum(3,7,sys_set.Flag.A4_Set,1);
+        
 
         break;
 
@@ -339,10 +334,10 @@ void Key_Act1(void)//
         // {
         //     if (sys_set.Calib_Point[i].x == 0xff || sys_set.Calib_Point[i].x == 0) break;
         //     sys_set.Calib_Point[menu.Cursor - 1] = Point_Queue_Dequeue(&(sys_set.Cam_Point));
-        //     Coordinate_Init();
         // }
         //还没改完，我先写直接调用了
         sys_set.Calib_Point[menu.Cursor - 1] = laser.Now_Pix;
+        Coordinate_Init();
         break;
         
         case Page_Wait:
