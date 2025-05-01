@@ -74,6 +74,8 @@ uint8_t Control_SetMode(Control_Mode Set_Mode)
             Pixel_Point point = Point_Queue_Dequeue(&(sys_set.Cam_Point));
             Point_Queue_Enqueue(&(sys_set.Target_Point), point);
         }
+        
+        sys_set.Flag.Arrive = 1;
         /* code */
         break;
     case Mode_Joystick:

@@ -335,12 +335,14 @@ void Key_Act1(void)//
         case Page_Square:
         //这里要改，改成等几秒钟
         /************************************************************************************************************************* */
-        for(uint8_t i = 0; i < 4; i ++)
-        {
-            if (sys_set.Calib_Point[i].x == 0xff || sys_set.Calib_Point[i].x == 0) break;
-            sys_set.Calib_Point[menu.Cursor - 1] = Point_Queue_Dequeue(&(sys_set.Cam_Point));
-            Coordinate_Init();
-        }
+        // for(uint8_t i = 0; i < 4; i ++)
+        // {
+        //     if (sys_set.Calib_Point[i].x == 0xff || sys_set.Calib_Point[i].x == 0) break;
+        //     sys_set.Calib_Point[menu.Cursor - 1] = Point_Queue_Dequeue(&(sys_set.Cam_Point));
+        //     Coordinate_Init();
+        // }
+        //还没改完，我先写直接调用了
+        sys_set.Calib_Point[menu.Cursor - 1] = laser.Now_Pix;
         break;
         
         case Page_Wait:
