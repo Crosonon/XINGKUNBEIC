@@ -32,7 +32,7 @@ typedef struct
 
 
 typedef struct {
-    Pixel_Point data[16];  // 存储目标点
+    Pixel_Point data[40];  // 存储目标点
     int front;                            // 队头索引
     int rear;                             // 队尾索引
     int size;                             // 当前元素数

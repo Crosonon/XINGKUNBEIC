@@ -33,46 +33,18 @@ uint8_t Control_SetMode(Control_Mode Set_Mode)
         sys_set.Flag.Arrive = 1;//这样中断中就会调取这个点
         break;
     case Mode_Square:
-        for (int i = 3; i >= 0; i--)
+        for(int i = 3; i >= 0; i--)
         {
             Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[i]);
             Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[i]);
-            Point_Queue_Enqueue(&(sys_set.Target_Point), Lerp_Pixel(sys_set.Calib_Point[i],sys_set.Calib_Point[(i == 0) ? 3 : (i-1)],0.5));
-            Point_Queue_Enqueue(&(sys_set.Target_Point), Lerp_Pixel(sys_set.Calib_Point[i],sys_set.Calib_Point[(i == 0) ? 3 : (i-1)],0.5));
+            for(int j = 1; j < 4; j++)
+            {
+                Point_Queue_Enqueue(&(sys_set.Target_Point), Lerp_Pixel(sys_set.Calib_Point[i],sys_set.Calib_Point[(i == 0) ? 3 : (i-1)],0.25 * j));
+                Point_Queue_Enqueue(&(sys_set.Target_Point), Lerp_Pixel(sys_set.Calib_Point[i],sys_set.Calib_Point[(i == 0) ? 3 : (i-1)],0.25 * j));
+            }
         }
-        // Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[3]);
-        // Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[3]);
-        
-
-        // Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[3]);
-        // Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[3]);
-        // Point_Queue_Enqueue(&(sys_set.Target_Point), Lerp_Pixel(sys_set.Calib_Point[3],sys_set.Calib_Point[2],0.25));
-        // Point_Queue_Enqueue(&(sys_set.Target_Point), Lerp_Pixel(sys_set.Calib_Point[3],sys_set.Calib_Point[2],0.25));
-        // Point_Queue_Enqueue(&(sys_set.Target_Point), Lerp_Pixel(sys_set.Calib_Point[3],sys_set.Calib_Point[2],0.5));
-        // Point_Queue_Enqueue(&(sys_set.Target_Point), Lerp_Pixel(sys_set.Calib_Point[3],sys_set.Calib_Point[2],0.5));
-        // Point_Queue_Enqueue(&(sys_set.Target_Point), Lerp_Pixel(sys_set.Calib_Point[3],sys_set.Calib_Point[2],0.75));
-        // Point_Queue_Enqueue(&(sys_set.Target_Point), Lerp_Pixel(sys_set.Calib_Point[3],sys_set.Calib_Point[2],0.75));
-        // Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[2]);
-        // Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[2]);
-
-        // Point_Queue_Enqueue(&(sys_set.Target_Point), Lerp_Pixel(sys_set.Calib_Point[2],sys_set.Calib_Point[1],0.25));
-        // Point_Queue_Enqueue(&(sys_set.Target_Point), Lerp_Pixel(sys_set.Calib_Point[2],sys_set.Calib_Point[1],0.25));
-        // Point_Queue_Enqueue(&(sys_set.Target_Point), Lerp_Pixel(sys_set.Calib_Point[2],sys_set.Calib_Point[1],0.5));
-        // Point_Queue_Enqueue(&(sys_set.Target_Point), Lerp_Pixel(sys_set.Calib_Point[2],sys_set.Calib_Point[1],0.5));
-        // Point_Queue_Enqueue(&(sys_set.Target_Point), Lerp_Pixel(sys_set.Calib_Point[2],sys_set.Calib_Point[1],0.75));
-        // Point_Queue_Enqueue(&(sys_set.Target_Point), Lerp_Pixel(sys_set.Calib_Point[2],sys_set.Calib_Point[1],0.75));
-        // Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[1]);
-        // Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[1]);
-        // for(int i = 3; i > 0; i--)
-        // {
-        //     Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[i]);
-        //     Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[i]);
-        //     for(int i = 1; i < 4; i++)
-        //     {
-        //         Point_Queue_Enqueue(&(sys_set.Target_Point), Lerp_Pixel(sys_set.Calib_Point[i],sys_set.Calib_Point[i-1],0.25 * i));
-        //         Point_Queue_Enqueue(&(sys_set.Target_Point), Lerp_Pixel(sys_set.Calib_Point[i],sys_set.Calib_Point[i-1],0.25 * i));
-        //     }
-        // }
+        Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[3]);
+        Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[3]);
 
 
         sys_set.Flag.Arrive = 1;
