@@ -50,15 +50,15 @@ SystemParams sys_set = {
 void Coordinate_Init(void)
 {
     //比例计算
-    sys_set.x_pixel_to_mm = (float)(
+    sys_set.x_pixel_to_mm = (float)500 / ((
         (sys_set.Calib_Point[0].x - sys_set.Calib_Point[1].x) + 
         (sys_set.Calib_Point[3].x - sys_set.Calib_Point[2].x)
-    ) / 2 / 500;
+    ) / 2);
 
-    sys_set.y_pixel_to_mm = (float)(
+    sys_set.y_pixel_to_mm = (float)500 / ((
         (sys_set.Calib_Point[3].y - sys_set.Calib_Point[0].y) + 
         (sys_set.Calib_Point[2].y - sys_set.Calib_Point[1].y)
-    ) / 2 / 500;
+    ) / 2);
 
     //原点设置
     mm_Point temp = {0,0};
@@ -107,7 +107,9 @@ uint8_t CheckUpdate_Del(void)
             .x = laser.Set_Pix.x - laser.Now_Pix.x,
             .y = laser.Set_Pix.y - laser.Now_Pix.y
         };
-        laser.Del_mm = Pixel_to_mm(Del_Pix);
+        // laser.Del_mm = Pixel_to_mm(Del_Pix);
+        laser.Del_mm.x = sys_set.x_pixel_to_mm * Del_Pix.x;
+        laser.Del_mm.y = sys_set.y_pixel_to_mm * Del_Pix.y;
         
         last_Set.x = laser.Set_Pix.x;
         last_Set.y = laser.Set_Pix.y;

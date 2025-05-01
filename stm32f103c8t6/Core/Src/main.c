@@ -281,14 +281,14 @@ int main(void)
 
     //用于无初始化的调试
     //{{290,20},{30,20},{23,216},{294,218}};
-    sys_set.Calib_Point[0].x = 237;
-    sys_set.Calib_Point[0].y = 49;
-    sys_set.Calib_Point[1].x = 87;
-    sys_set.Calib_Point[1].y = 39;
-    sys_set.Calib_Point[2].x = 76;
-    sys_set.Calib_Point[2].y = 197;
-    sys_set.Calib_Point[3].x = 242;
-    sys_set.Calib_Point[3].y = 204;
+    sys_set.Calib_Point[0].x = 231;
+    sys_set.Calib_Point[0].y = 16;
+    sys_set.Calib_Point[1].x = 55;
+    sys_set.Calib_Point[1].y = 9;
+    sys_set.Calib_Point[2].x = 48;
+    sys_set.Calib_Point[2].y = 183;
+    sys_set.Calib_Point[3].x = 229;
+    sys_set.Calib_Point[3].y = 190;
 
     Coordinate_Init();
 

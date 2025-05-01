@@ -137,8 +137,8 @@ void Menu_PageShow(void)
         OLED_ShowNum(1,1,sys_set.Flag.Arrive,1);
         OLED_ShowFloat(2,1,laser.Del_mm.x);
         OLED_ShowFloat(2,9,laser.Del_mm.y);
-        OLED_ShowNum(3,1,laser.Now_Pix.x,5);
-        OLED_ShowNum(3,8,laser.Now_Pix.y,5);
+        OLED_ShowFloat(3,1,sys_set.x_pixel_to_mm);
+        OLED_ShowFloat(3,8,sys_set.y_pixel_to_mm);
         OLED_ShowNum(4, 5, laser.Set_Pix.x, 4);
         OLED_ShowNum(4, 10, laser.Set_Pix.y, 4);
         OLED_ShowFloat(1, 3, absDis(laser.Del_mm));
