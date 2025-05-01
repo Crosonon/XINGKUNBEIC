@@ -36,16 +36,11 @@ uint8_t Control_SetMode(Control_Mode Set_Mode)
         for(int i = 3; i >= 0; i--)
         {
             Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[i]);
-            Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[i]);
-            for(int j = 1; j < 4; j++)
-            {
-                Point_Queue_Enqueue(&(sys_set.Target_Point), Lerp_Pixel(sys_set.Calib_Point[i],sys_set.Calib_Point[(i == 0) ? 3 : (i-1)],0.25 * j));
-                Point_Queue_Enqueue(&(sys_set.Target_Point), Lerp_Pixel(sys_set.Calib_Point[i],sys_set.Calib_Point[(i == 0) ? 3 : (i-1)],0.25 * j));
-            }
         }
         Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[3]);
-        Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[3]);
 
+        Point_Queue_Lerp(&(sys_set.Target_Point), 3);
+        Point_Queue_Double(&(sys_set.Target_Point));
 
         sys_set.Flag.Arrive = 1;
         break;
@@ -82,7 +77,16 @@ uint8_t Control_SetMode(Control_Mode Set_Mode)
             Pixel_Point point = Point_Queue_Dequeue(&(sys_set.Cam_Point));
             Point_Queue_Enqueue(&(sys_set.Target_Point), point);
         }
-        
+        /*上面的看不懂，此处是孙艺的代码********************************************************************* */
+
+        //一通操作猛如虎，得到了按顺序写有四个点的sys_set.target
+        if (sys_set.Target_Point.size != 4) return 0;
+        Point_Queue_Enqueue(&(sys_set.Target_Point), Point_Queue_Peek(&(sys_set.Target_Point)));
+        Point_Queue_Lerp(&(sys_set.Target_Point), 15);
+        Point_Queue_Double(&(sys_set.Target_Point));
+
+        /*********************************************************************** */
+
         sys_set.Flag.Arrive = 1;
         /* code */
         break;

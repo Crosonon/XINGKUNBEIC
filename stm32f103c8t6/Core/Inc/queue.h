@@ -3,7 +3,6 @@
 #include <stdbool.h>
 #include "Coordinate.h"
 
-#define TARGET_QUEUE_SIZE 40  // 队列容量
 
 
 // 初始化队列
@@ -23,3 +22,8 @@ Pixel_Point Point_Queue_Dequeue(Point_Queue *q);
 
 // 查看队首元素（不移除）
 Pixel_Point Point_Queue_Peek(Point_Queue *q);
+
+//把一个点写成两个点
+void Point_Queue_Double(Point_Queue *q);
+
+void Point_Queue_Lerp(Point_Queue *q, uint16_t x);

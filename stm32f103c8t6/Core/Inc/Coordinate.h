@@ -5,6 +5,8 @@
 #include "stm32f1xx_hal.h"
 // #include "queue.h"
 
+#define TARGET_QUEUE_SIZE 150  // 队列容量
+
 typedef enum
 {
     Mode_None,
@@ -13,8 +15,6 @@ typedef enum
     Mode_A4Paper,
     Mode_Joystick,
 }Control_Mode;
-
-
 
 //二维像素点uint16_t
 typedef struct 
@@ -32,7 +32,7 @@ typedef struct
 
 
 typedef struct {
-    Pixel_Point data[40];  // 存储目标点
+    Pixel_Point data[TARGET_QUEUE_SIZE];  // 存储目标点
     int front;                            // 队头索引
     int rear;                             // 队尾索引
     int size;                             // 当前元素数

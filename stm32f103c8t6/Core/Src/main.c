@@ -180,11 +180,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     if (sys_set.Flag.Arrive == 1)
     {
       //调用下一个点到set，如果65535则结束
-/********************************************************************************************************* */
-// motort = time + 50;
-// motor_1L.Lock = Locked;
-// motor_2H.Lock = Locked;
-/********************************************************************************************************* */
 
       Pixel_Point point = Point_Queue_Dequeue(&(sys_set.Target_Point));
       if (point.x > 1000 || point.x == 0)
@@ -223,13 +218,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     time ++;
 
     Beep_Update();
-    /********************************************************************************************************* */
-    // if(motort < time){
-    // motor_1L.Lock = Unlocked;
-    // motor_2H.Lock = Unlocked;
-
-    // }
-    /********************************************************************************************************* */
   }
 }
 /* USER CODE END 0 */
@@ -294,14 +282,14 @@ int main(void)
 
     //用于无初始化的调试
     //{{290,20},{30,20},{23,216},{294,218}};
-    sys_set.Calib_Point[0].x = 262;
-    sys_set.Calib_Point[0].y = 35;
-    sys_set.Calib_Point[1].x = 72;
-    sys_set.Calib_Point[1].y = 34;
-    sys_set.Calib_Point[2].x = 66;
-    sys_set.Calib_Point[2].y = 219;
-    sys_set.Calib_Point[3].x = 255;
-    sys_set.Calib_Point[3].y = 219;
+    sys_set.Calib_Point[0].x = 263;
+    sys_set.Calib_Point[0].y = 39;
+    sys_set.Calib_Point[1].x = 78;
+    sys_set.Calib_Point[1].y = 33;
+    sys_set.Calib_Point[2].x = 70;
+    sys_set.Calib_Point[2].y = 212;
+    sys_set.Calib_Point[3].x = 254;
+    sys_set.Calib_Point[3].y = 212;
 
     Coordinate_Init();
 
