@@ -30,15 +30,16 @@ uint8_t Control_SetMode(Control_Mode Set_Mode)
         break;
     case Mode_Origin:
         Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.origin_point);
-        // laser.Set_Pix = Point_Queue_Dequeue(&(sys_set.Target_Point));//删去？
         sys_set.Flag.Arrive = 1;//这样中断中就会调取这个点
         break;
     case Mode_Square:
-        for (int i = 0; i < 4; i++)
+        for (int i = 3; i >= 0; i--)
         {
-            Pixel_Point point = sys_set.Calib_Point[i];
-            Point_Queue_Enqueue(&(sys_set.Target_Point), point);
+            Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[i]);
+            Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[i]);
         }
+        Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[3]);
+        Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[3]);
         sys_set.Flag.Arrive = 1;
         break;
     case Mode_A4Paper:

@@ -184,14 +184,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       {
         sys_set.Flag.End = 1;
         Control_SetMode(Mode_Joystick);
-        HAL_GPIO_WritePin(LED1_GPIO_Port,LED1_Pin,GPIO_PIN_RESET);
       }
       else
       {
         laser.Set_Pix = point;
         sys_set.Flag.Arrive = 0;
-
-        HAL_GPIO_WritePin(LED1_GPIO_Port,LED1_Pin,GPIO_PIN_SET);
+        Beep_Request(0.1);
       }
     }
 
@@ -273,6 +271,7 @@ int main(void)
 
   HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
   HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(Beep_GPIO_Port, Beep_Pin, GPIO_PIN_SET);
 
   Point_Queue_Init(&(sys_set.Cam_Point));
 

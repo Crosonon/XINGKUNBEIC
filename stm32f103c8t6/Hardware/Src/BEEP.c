@@ -15,15 +15,15 @@ void Beep_Update(void)
         return;
     }
     //还有时间但是没开就打开
-    else if ((Beep_time > time) && (HAL_GPIO_ReadPin(Beep_GPIO_Port, Beep_Pin) == 0))
+    else if ((Beep_time > time) && (HAL_GPIO_ReadPin(Beep_GPIO_Port, Beep_Pin) == 1))
     {
-        HAL_GPIO_WritePin(Beep_GPIO_Port, Beep_Pin, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(Beep_GPIO_Port, Beep_Pin, GPIO_PIN_RESET);
         return;
     }
     //没时间了就关上
     else if (Beep_time <= time)
     {
-        HAL_GPIO_WritePin(Beep_GPIO_Port, Beep_Pin, GPIO_PIN_RESET); 
+        HAL_GPIO_WritePin(Beep_GPIO_Port, Beep_Pin, GPIO_PIN_SET); 
         Beep_time = 0;
         return;
     }

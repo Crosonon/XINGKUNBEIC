@@ -135,14 +135,13 @@ void Menu_PageShow(void)
 
         //以下为调试代码
         OLED_ShowNum(1,1,sys_set.Flag.Arrive,1);
+        OLED_ShowNum(1,5,HAL_GPIO_ReadPin(Beep_GPIO_Port,Beep_Pin),1);
         OLED_ShowFloat(2,1,laser.Del_mm.x);
         OLED_ShowFloat(2,9,laser.Del_mm.y);
         OLED_ShowFloat(3,1,sys_set.x_pixel_to_mm);
         OLED_ShowFloat(3,8,sys_set.y_pixel_to_mm);
         OLED_ShowNum(4, 5, laser.Set_Pix.x, 4);
         OLED_ShowNum(4, 10, laser.Set_Pix.y, 4);
-        OLED_ShowFloat(1, 3, absDis(laser.Del_mm));
-        if(absDis(laser.Del_mm)<8)OLED_ShowNum(1,9,time,6);
 
         // OLED_ShowNum(3,1,sys_set.Flag.Init,1);
         // OLED_ShowNum(3,3,sys_set.Flag.End,1);
