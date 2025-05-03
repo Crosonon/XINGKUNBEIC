@@ -28,6 +28,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include <math.h>
 #include "BEEP.h"
 #include "OLED.h"
 #include "MOTOR.h"
@@ -46,7 +47,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define abs(x) (x > 0 ? x : (-x))
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -65,7 +66,6 @@ uint32_t Beep_time = 0;
 uint32_t Wait_time = 0;
 
 uint8_t a4_num = 0;
-static int32_t motort = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -128,6 +128,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
             tem_point.x = (uart2_rx_buffer[0]<<8) | (uart2_rx_buffer[1]);
             tem_point.y = (uart2_rx_buffer[2]<<8) | (uart2_rx_buffer[3]);
 
+            //识别的大部分是外,向原点方向移动矫正
+            tem_point.x += (tem_point.x < sys_set.origin_point.x ? 1 : -1) * 2;
+            tem_point.y += (tem_point.y < sys_set.origin_point.y ? 1 : -1) * 2;
+
             Point_Queue_Enqueue(&(sys_set.Cam_Point), tem_point);
             a4_num++;
             if (a4_num == 4)
@@ -173,8 +177,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     //如果队列已经走完，则直接退出
     // if(sys_set.Flag.End == 1)return;
 
-    //检查set和now的更新，并以此更新del
-    CheckUpdate_Del();
+    
 
     //调取下一个点（如果刚设置模式，则此时arrive为1，会取刚刚入队的点）
     if (sys_set.Flag.Arrive == 1)
@@ -190,12 +193,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       else
       {
         laser.Set_Pix = point;
+        CheckUpdate_Del();
         sys_set.Flag.Arrive = 0;
         Beep_Request(0.1);
       }
     }
 
+    //检查set和now的更新，并以此更新del
+    // CheckUpdate_Del();
     // Motor_Lock_Check();
+
+    // Segment seg;
+    // Segment_Init(&seg, laser.Now_Pix, laser.Set_Pix);
 
     // 给两个电机设定方向，并检测是否到达,如果到达了会给两个电机置stop，下面不会动
     //更新到达情况和方向,如果到了置1,没到置0
@@ -206,11 +215,20 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       // sys_set.Flag.Arrive = 0;
       motor_1L.Dir = Joy_Get_X();
       motor_2H.Dir = Joy_Get_Y();
+      Motor_Move_Unit(motor_1L);
+      Motor_Move_Unit(motor_2H);
+      return;
     }
 
-    //判断是否走，走一步,并更新电机的位置
-    Motor_Update_Position(&motor_1L, &laser.Del_mm.x, Motor_Step_Dis(motor_1L, laser));
-    Motor_Update_Position(&motor_2H, &laser.Del_mm.y, Motor_Step_Dis(motor_2H, laser));
+    // float n = TOTAL_STEP > abs(seg.dis - 5) ? abs(seg.dis - 5): TOTAL_STEP;
+    // OLED_ShowFloat(1, 3, n);
+    // for (int i = 1; i <= n * cos(seg.theta) * cos(seg.theta); ++i)
+    //   Motor_Move_Unit(motor_1L);
+    // for (int i = 1; i <= n * sin(seg.theta) * sin(seg.theta); ++i)
+    //   Motor_Move_Unit(motor_2H);
+    // //判断是否走，走一步,并更新电机的位置
+    Motor_Update_Position(&motor_1L, &laser.Del_mm.x, Motor_Step_Dis(motor_1L, laser) * 1.2);
+    Motor_Update_Position(&motor_2H, &laser.Del_mm.y, Motor_Step_Dis(motor_2H, laser) * 1.2);
   }
 
   if (htim -> Instance == TIM4)
@@ -273,7 +291,6 @@ int main(void)
 
   HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
   HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(Beep_GPIO_Port, Beep_Pin, GPIO_PIN_SET);
 
   Point_Queue_Init(&(sys_set.Cam_Point));
 
@@ -282,14 +299,14 @@ int main(void)
 
     //用于无初始化的调试
     //{{290,20},{30,20},{23,216},{294,218}};
-    sys_set.Calib_Point[0].x = 263;
-    sys_set.Calib_Point[0].y = 39;
-    sys_set.Calib_Point[1].x = 78;
-    sys_set.Calib_Point[1].y = 33;
-    sys_set.Calib_Point[2].x = 70;
-    sys_set.Calib_Point[2].y = 212;
-    sys_set.Calib_Point[3].x = 254;
-    sys_set.Calib_Point[3].y = 212;
+    sys_set.Calib_Point[0].x = 259;
+    sys_set.Calib_Point[0].y = 40;
+    sys_set.Calib_Point[1].x = 71;
+    sys_set.Calib_Point[1].y = 34;
+    sys_set.Calib_Point[2].x = 62;
+    sys_set.Calib_Point[2].y = 224;
+    sys_set.Calib_Point[3].x = 261;
+    sys_set.Calib_Point[3].y = 228;
 
     Coordinate_Init();
 

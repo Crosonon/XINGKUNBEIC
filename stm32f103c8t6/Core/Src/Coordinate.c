@@ -130,3 +130,21 @@ Pixel_Point Lerp_Pixel(Pixel_Point p1, Pixel_Point p2, float k)
     p.y = p1.y * (1 - k) + p2.y * k;
     return p;
 }
+
+/**
+ * @brief 初始化线段
+ */
+void Segment_Init(Segment *seg, Pixel_Point start, Pixel_Point target)
+{
+    seg->start = start;
+    seg->target = target;
+    seg->k = (float)(target.y - start.y) / (target.x - start.x);
+    seg->b = start.y - seg->k * start.x;
+    seg->dis = sqrt(pow((target.x - start.x), 2) + pow((target.y - start.y), 2));
+    seg->theta = atan(seg->k);
+    Pixel_Point tmp = {
+        .x = target.x - start.x,
+        .y = target.y - start.y
+    };
+    seg->del = Pixel_to_mm(tmp);
+}

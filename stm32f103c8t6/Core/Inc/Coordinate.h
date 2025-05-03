@@ -6,6 +6,7 @@
 // #include "queue.h"
 
 #define TARGET_QUEUE_SIZE 150  // 队列容量
+#define TOTAL_STEP 5          //x和y移动总步数
 
 typedef enum
 {
@@ -106,6 +107,13 @@ typedef struct
     float Correct_K;
 } Laser_Point_Watch;
 
+typedef struct
+{
+    Pixel_Point start, target;
+    mm_Point del;
+    float k, b, theta, dis;
+} Segment;
+
 extern SystemParams sys_set;
 extern Laser_Point_Ctrl laser;
 extern Laser_Point_Watch laser_watch;
@@ -116,7 +124,7 @@ mm_Point Pixel_to_mm(Pixel_Point pix_point);
 float absDis(mm_Point dis2d);
 uint8_t CheckUpdate_Del(void);
 Pixel_Point Lerp_Pixel(Pixel_Point p1, Pixel_Point p2, float k);
-
+void Segment_Init(Segment *seg, Pixel_Point start, Pixel_Point target);
 
 #endif
 

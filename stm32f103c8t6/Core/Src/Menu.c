@@ -135,9 +135,6 @@ void Menu_PageShow(void)
 
         //以下为调试代码
         OLED_ShowNum(1,1,sys_set.Flag.Arrive,1);
-        Pixel_Point p = Lerp_Pixel(sys_set.Calib_Point[3],sys_set.Calib_Point[2],0.25);
-        OLED_ShowNum(1,3,p.x,3);
-        OLED_ShowNum(1,8,p.y,3);
         OLED_ShowFloat(2,1,laser.Del_mm.x);
         OLED_ShowFloat(2,9,laser.Del_mm.y);
         OLED_ShowNum(3, 5, laser.Set_Pix.x, 4);

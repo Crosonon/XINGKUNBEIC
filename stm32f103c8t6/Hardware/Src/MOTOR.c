@@ -1,12 +1,10 @@
-#include "math.h"
+#include <math.h>
 #include "MOTOR.h"
 #include "gpio.h"
 #include "Coordinate.h"
-
-
-
 #include "OLED.h"
 
+#define abs(x) (x > 0 ? x : (-x))
 
 //电机驱动模块设置，全局变量，需要手动更改
 Motor_Drive_Set motor_drive_set = {
@@ -118,7 +116,7 @@ uint8_t Motor_Update_Position(Motor_Config* motor, float* del, float step_dis)
 
 uint8_t Motor_Dir_Set(Motor_Config* motor1, Motor_Config* motor2, mm_Point diedel)
 {
-    if(absDis(diedel) < 8)//如果总距离小
+    if(fabs(diedel.x) <= 8 && fabs(diedel.y) <= 8)//如果距离小
     {
         //到达！
         motor1->Dir = Stop;
@@ -131,8 +129,8 @@ uint8_t Motor_Dir_Set(Motor_Config* motor1, Motor_Config* motor2, mm_Point diede
     }
     HAL_GPIO_WritePin(LED2_GPIO_Port,LED2_Pin,GPIO_PIN_RESET);
 
-    motor1->Dir = (diedel.x > 1) ? Right : (diedel.x < -1) ? Left : Stop;
-    motor2->Dir = (diedel.y > 1) ? Down : (diedel.y < -1) ? Up : Stop;
+    motor1->Dir = (diedel.x > 5) ? Right : (diedel.x < -5) ? Left : Stop;
+    motor2->Dir = (diedel.y > 5) ? Down : (diedel.y < -5) ? Up : Stop;
     return 1;
 }
 
@@ -168,7 +166,30 @@ float Laser_Correct(Laser_Point_Ctrl laser)
 float Motor_Step_Dis(Motor_Config motor, Laser_Point_Ctrl laser)
 {
     //步距=垂直距离*角度*矫正系数，角度=速度*3.14/100 /细分
-    float theta = motor.Speed * 3.14 / 100 / motor_drive_set.Subdivide;
-    return laser.correct.h * theta * Laser_Correct(laser);
+    // float theta = motor.Speed * 3.14 / 100 / motor_drive_set.Subdivide;
+    // return laser.correct.h * theta * Laser_Correct(laser);
+
+
+    //假设摄像头在白板中心，理论上计算结果是精确的，但由于云台和摄像头不在同一个点，所以存在误差
+    //计算过程注释写不清楚
+    float theta_x = motor.Speed * 3.1415926535 / 100 / motor_drive_set.Subdivide,
+          theta_y = theta_x;
+    Pixel_Point del = {
+        .x = laser.Now_Pix.x - sys_set.origin_point.x,
+        .y = laser.Now_Pix.y - sys_set.origin_point.y
+    };
+    mm_Point del_mm = Pixel_to_mm(del);
+    float screen_dis_corr_x = sqrt(pow(1000.0, 2) + pow(del_mm.x, 2)),
+          screen_dis_corr_y = sqrt(pow(1000.0, 2) + pow(del_mm.y, 2));
+    float alpha_x = atan(del_mm.x / screen_dis_corr_y),
+          alpha_y = atan(del_mm.y / screen_dis_corr_x);
+    if (motor.Dir == Left) theta_x = -theta_x;
+    if (motor.Dir == Down) theta_y = -theta_y;
+    float step_dis_x = fabs(tan(alpha_x + theta_x) * screen_dis_corr_y - del_mm.x),
+          step_dis_y = fabs(tan(alpha_y + theta_x) * screen_dis_corr_x - del_mm.y);
+    if (motor.Number == 1)
+        return step_dis_x;
+    else
+        return step_dis_y;
 }
 

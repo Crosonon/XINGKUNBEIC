@@ -53,10 +53,10 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, Diastimeter_Trig_Pin|Motor_1L_En_Pin|Beep_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, Diastimeter_Trig_Pin|Motor_1L_En_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, LED1_Pin|LED2_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOA, LED1_Pin|LED2_Pin|Beep_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, Motor_1L_Dir_Pin|Motor_2H_Dir_Pin|Motor_1L_Step_Pin|Motor_2H_Step_Pin
