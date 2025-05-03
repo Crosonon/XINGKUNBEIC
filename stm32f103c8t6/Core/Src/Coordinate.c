@@ -44,7 +44,8 @@ SystemParams sys_set = {
         .Arrive = 1,
         .End = 1,
         .A4_Set = 0,
-    }
+    },
+    .screen_dis = 1000.0
 };
 
 void Coordinate_Init(void)

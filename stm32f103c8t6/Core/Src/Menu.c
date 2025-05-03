@@ -57,7 +57,7 @@ void Menu_PageInit(Menu_Page Page)
         OLED_ShowString(1, 1, "Set:    ,    ");
         OLED_ShowString(2, 1, "Now:    ,    ");
         OLED_ShowString(3, 1, "Joy:    ,    ");
-        OLED_ShowString(4, 1, "SR4:        m");
+        OLED_ShowString(4, 1, "screen:        m");
         menu.Cursor = 0;
         break;
 
@@ -89,7 +89,7 @@ void Menu_PageInit(Menu_Page Page)
         break;
 
         case Page_set2:
-        OLED_ShowString(1,1,"OtherMode");//没想好
+        OLED_ShowString(1,1,"screen dis:");//没想好
         Menu_CursorMove(1);
         break;
 
@@ -159,8 +159,8 @@ void Menu_PageShow(void)
         //摇杆情况
         OLED_ShowString(3, 5, (Joy_Get_X() == Left) ? "Left" : (Joy_Get_X() == Right) ? "Righ" : " Mid");
         OLED_ShowString(3, 10, (Joy_Get_Y() == Up) ? " Up " : (Joy_Get_Y() == Down) ? "Down" : " Mid");
-        //超声波
-        OLED_ShowFloat(4, 5, 1);
+        //屏幕距离
+        OLED_ShowFloat(4, 8, sys_set.screen_dis);
         break;
 
         case Page_Main3:
@@ -177,6 +177,7 @@ void Menu_PageShow(void)
         break;
 
         case Page_set2:
+
         break;
 
         case Page_Square:

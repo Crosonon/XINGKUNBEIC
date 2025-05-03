@@ -64,6 +64,8 @@ typedef struct
     Point_Queue Target_Point;
     //系统标志位
     sys_flag Flag;
+    //屏幕距离
+    float screen_dis;
 } SystemParams;
 
 typedef struct

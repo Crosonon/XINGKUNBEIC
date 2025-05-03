@@ -179,8 +179,8 @@ float Motor_Step_Dis(Motor_Config motor, Laser_Point_Ctrl laser)
         .y = laser.Now_Pix.y - sys_set.origin_point.y
     };
     mm_Point del_mm = Pixel_to_mm(del);
-    float screen_dis_corr_x = sqrt(pow(1000.0, 2) + pow(del_mm.x, 2)),
-          screen_dis_corr_y = sqrt(pow(1000.0, 2) + pow(del_mm.y, 2));
+    float screen_dis_corr_x = sqrt(pow(sys_set.screen_dis, 2) + pow(del_mm.x, 2)),
+          screen_dis_corr_y = sqrt(pow(sys_set.screen_dis, 2) + pow(del_mm.y, 2));
     float alpha_x = atan(del_mm.x / screen_dis_corr_y),
           alpha_y = atan(del_mm.y / screen_dis_corr_x);
     if (motor.Dir == Left) theta_x = -theta_x;
