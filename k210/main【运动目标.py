@@ -83,7 +83,14 @@ while True:
 
     # 矩形检测及发送
     if trigger_rect == 1:
-        rects = img.find_rects(threshold=3500, roi=(40,30,200,150))
+
+    # 矩形检测（ROI （识别感兴趣区域）设置为20,15开始，宽225，高165的区域）
+
+         # 转换为灰度图以提高处理速度（可选）
+        gray_img = img.to_grayscale(copy=True)
+
+        rects = gray_img.find_rects(threshold=7000 ,roi=(30,30,220,170))
+
         if rects:
             for r in rects:
                 if r.w() > 30 and r.h() > 30:
@@ -155,6 +162,9 @@ while True:
                       last_send = current_time
     # 定时发送坐标
 
+    # 按键处理
+    if KEY.is_press():
+        trigger_rect = 1 if trigger_rect == 0 else 0
 
     lcd.display(img)
     lcd.draw_string(0, 0, "YIBAI4", lcd.RED, lcd.WHITE)
