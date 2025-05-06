@@ -2,7 +2,7 @@
 *.uvoptx
 *.uvguix
 *.uvguix.*
-*/MDK-ARM/Laser Control
+**/MDK-ARM/Laser Control
 *.lst
 RTE
 DebugConfig
