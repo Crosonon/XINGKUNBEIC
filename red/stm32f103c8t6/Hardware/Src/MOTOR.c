@@ -116,7 +116,7 @@ uint8_t Motor_Update_Position(Motor_Config* motor, float* del, float step_dis)
 
 uint8_t Motor_Dir_Set(Motor_Config* motor1, Motor_Config* motor2, mm_Point diedel)
 {
-    if(fabs(diedel.x) <= 8 && fabs(diedel.y) <= 8)//如果距离小
+    if(fabs(diedel.x) <= 3 && fabs(diedel.y) <= 3)//如果距离小
     {
         //到达！
         motor1->Dir = Stop;
@@ -129,8 +129,8 @@ uint8_t Motor_Dir_Set(Motor_Config* motor1, Motor_Config* motor2, mm_Point diede
     }
     HAL_GPIO_WritePin(LED2_GPIO_Port,LED2_Pin,GPIO_PIN_RESET);
 
-    motor1->Dir = (diedel.x > 5) ? Right : (diedel.x < -5) ? Left : Stop;
-    motor2->Dir = (diedel.y > 5) ? Down : (diedel.y < -5) ? Up : Stop;
+    motor1->Dir = (diedel.x > 2) ? Right : (diedel.x < -2) ? Left : Stop;
+    motor2->Dir = (diedel.y > 2) ? Down : (diedel.y < -2) ? Up : Stop;
     return 1;
 }
 
@@ -183,6 +183,7 @@ float Motor_Step_Dis(Motor_Config motor, Laser_Point_Ctrl laser)
           screen_dis_corr_y = sqrt(pow(sys_set.screen_dis, 2) + pow(del_mm.y, 2));
     float alpha_x = atan(del_mm.x / screen_dis_corr_y),
           alpha_y = atan(del_mm.y / screen_dis_corr_x);
+          
     if (motor.Dir == Left) theta_x = -theta_x;
     if (motor.Dir == Down) theta_y = -theta_y;
     float step_dis_x = fabs(tan(alpha_x + theta_x) * screen_dis_corr_y - del_mm.x),

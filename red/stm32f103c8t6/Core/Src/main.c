@@ -136,7 +136,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
             a4_num++;
             if (a4_num == 4)
             {
-              sys_set.Flag.A4_Set = 1;
+              // sys_set.Flag.A4_Set = 1;
               a4_num = 0;
             }
           }
@@ -299,14 +299,14 @@ int main(void)
 
     //用于无初始化的调试
     //{{290,20},{30,20},{23,216},{294,218}};
-    sys_set.Calib_Point[0].x = 259;
-    sys_set.Calib_Point[0].y = 40;
-    sys_set.Calib_Point[1].x = 71;
-    sys_set.Calib_Point[1].y = 34;
-    sys_set.Calib_Point[2].x = 62;
-    sys_set.Calib_Point[2].y = 224;
+    sys_set.Calib_Point[0].x = 260;
+    sys_set.Calib_Point[0].y = 31;
+    sys_set.Calib_Point[1].x = 72;
+    sys_set.Calib_Point[1].y = 27;
+    sys_set.Calib_Point[2].x = 61;
+    sys_set.Calib_Point[2].y = 220;
     sys_set.Calib_Point[3].x = 261;
-    sys_set.Calib_Point[3].y = 228;
+    sys_set.Calib_Point[3].y = 224;
 
     Coordinate_Init();
 

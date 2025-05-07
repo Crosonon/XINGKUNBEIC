@@ -36,8 +36,10 @@ uint8_t Control_SetMode(Control_Mode Set_Mode)
         {
             Error_Handler();
         }
+
         Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.origin_point);
         Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.origin_point);
+
         sys_set.Flag.Arrive = 1;//这样中断中就会调取这个点
         HAL_TIM_Base_Start_IT(&htim3);
         break;
@@ -48,11 +50,11 @@ uint8_t Control_SetMode(Control_Mode Set_Mode)
         {
             Error_Handler();
         }
-        for(int i = 3; i >= 0; i--)
+
+        for(int i = 4; i >= 0; i--)
         {
-            Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[i]);
+            Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[i % 4]);
         }
-        Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.Calib_Point[3]);
 
         Point_Queue_Lerp(&(sys_set.Target_Point), 4);
         Point_Queue_Double(&(sys_set.Target_Point));
@@ -60,12 +62,15 @@ uint8_t Control_SetMode(Control_Mode Set_Mode)
         sys_set.Flag.Arrive = 1;
         HAL_TIM_Base_Start_IT(&htim3);
         break;
-    case Mode_A4Paper:
-        //发消息告诉k210要发消息给我
-        //这里理应等一下，但是我有点不知道该怎么等
-        //也许要先有点，再set这个模式
 
+    case Mode_A4Paper:
         HAL_TIM_Base_Stop_IT(&htim3);
+        htim3.Init.Period = 20000-1;
+        if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+        {
+            Error_Handler();
+        }
+
         a4_data[1] = 4;
         HAL_UART_Transmit(&huart2, a4_data, 3, 10000);
         HAL_Delay(1000);//第一次发送后 k210开始识别 需要等待的时间长一些
@@ -87,33 +92,20 @@ uint8_t Control_SetMode(Control_Mode Set_Mode)
             }
             return 0;
         }
-        
-        sys_set.Flag.Arrive = 0;
+
         for(int i = 0; i < 4; i ++)
         {
             //一样检测是否0
             Pixel_Point point = Point_Queue_Dequeue(&(sys_set.Cam_Point));
             Point_Queue_Enqueue(&(sys_set.Target_Point), point);
         }
-        /*上面的看不懂，此处是孙艺的代码********************************************************************* */
-
-        //一通操作猛如虎，得到了按顺序写有四个点的sys_set.target
         if (sys_set.Target_Point.size != 4) return 0;
-
-        htim3.Init.Period = 20000-1;
-        if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
-        {
-            Error_Handler();
-        }
 
         Point_Queue_Enqueue(&(sys_set.Target_Point), Point_Queue_Peek(&(sys_set.Target_Point)));
         Point_Queue_Lerp(&(sys_set.Target_Point), 9);
 
-        /*********************************************************************** */
-
-        sys_set.Flag.A4_Set = 0;
+        // sys_set.Flag.A4_Set = 0;
         sys_set.Flag.Arrive = 1;
-
         HAL_TIM_Base_Start_IT(&htim3);
         /* code */
         break;
@@ -125,28 +117,4 @@ uint8_t Control_SetMode(Control_Mode Set_Mode)
     return (uint8_t)Current_Mode;
 }
 
-uint8_t Control_EndMode(void)
-{
-    switch (Current_Mode)
-    {
-    case Mode_None:
-        /* code */
-        break;
-    case Mode_Origin:
-        //原点模式结束
-        break;
-    case Mode_Square:
-        //方形模式结束
-        break;
-    case Mode_A4Paper:
-        //a4模式结束
-        sys_set.Flag.A4_Set = 0;
-        break;
-    case Mode_Joystick:
-        /* code */
-        break;
-    }
-    Current_Mode = Mode_None;
-    return Current_Mode;
-}
 

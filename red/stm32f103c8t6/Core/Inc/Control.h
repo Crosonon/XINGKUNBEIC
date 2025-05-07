@@ -9,7 +9,6 @@ extern Control_Mode Current_Mode;
 
 void Control_Init(void);
 uint8_t Control_SetMode(Control_Mode Set_Mode);
-uint8_t Control_EndMode(void);
 
 
 #endif
