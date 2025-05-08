@@ -79,44 +79,6 @@ void Menu_PageInit(Menu_Page Page)
         }
         Menu_CursorMove(1);
         break;
-
-        case Page_set1:
-        OLED_ShowString(1,1,"Origin");
-        OLED_ShowString(2,1,"Square");
-        OLED_ShowString(3,1,"A4");
-        OLED_ShowString(4,1,"Joystick");
-        Menu_CursorMove(1);
-        break;
-
-        case Page_set2:
-        OLED_ShowString(1,1,"screen dis:");//没想好
-        Menu_CursorMove(1);
-        break;
-
-        case Page_Square:
-        OLED_ShowString(1,1,"RU1:    ,    ");
-        OLED_ShowString(2,1,"LU2:    ,    ");
-        OLED_ShowString(3,1,"LD3:    ,    ");
-        OLED_ShowString(4,1,"RD4:    ,    ");
-        Menu_CursorMove(1);
-        break;
-        
-        case Page_Wait:
-        OLED_ShowString(1,1,"unset");
-        break;
-        
-        case Page_Disinit:
-        OLED_ShowString(1,1,"Without Init");
-        OLED_ShowString(1,1,"Init or return ?");
-        OLED_ShowString(3,1,"goto    Init");
-        OLED_ShowString(4,1,"return  Main");
-        Menu_CursorMove(3);
-        break;
-        
-        case Page_Error:
-        OLED_ShowString(1,1,"unset");
-        break;
-        
     }
 }
 
@@ -125,26 +87,14 @@ void Menu_PageShow(void)
     switch (menu.Page)
     {
         case Page_Main1:
-        // OLED_ShowString(1,7,(motor_drive_set.Lock == Locked) ? " Lock " : "Unlock");//这里要定义一个变量接收电机总开关的情况
-        // OLED_ShowFloat(2,7,VoltCH2);
-        // OLED_ShowString(3,7,(Current_Mode == Mode_Joystick) ? "Joystick" : 
-        //     (Current_Mode == Mode_Origin) ? "Origin" : 
-        //     (Current_Mode == Mode_Square) ? "Square" : 
-        //     (Current_Mode == Mode_A4Paper) ? "A4Paper" : "None");
-        // OLED_ShowFloat(4, 7, 0);//计时还没写
 
         //以下为调试代码
         OLED_ShowNum(1,1,sys_set.Flag.Arrive,1);
-        OLED_ShowFloat(2,1,laser.Del_mm.x);
-        OLED_ShowFloat(2,9,laser.Del_mm.y);
+        OLED_ShowString(2,1,(motor_drive_set.Lock == Locked) ? " Lock " : "Unlock");
         OLED_ShowNum(3, 5, laser.Set_Pix.x, 4);
         OLED_ShowNum(3, 10, laser.Set_Pix.y, 4);
         OLED_ShowString(4, 3, (motor_1L.Dir == Left) ? "Left" : (motor_1L.Dir == Right) ? "Righ" : " Mid");
         OLED_ShowString(4, 10, (motor_2H.Dir == Up) ? " Up " : (motor_2H.Dir == Down) ? "Down" : " Mid");
-
-        // OLED_ShowNum(3,1,sys_set.Flag.Init,1);
-        // OLED_ShowNum(3,3,sys_set.Flag.End,1);
-        // OLED_ShowNum(3,7,sys_set.Flag.A4_Set,1);
         
 
         break;
@@ -168,50 +118,6 @@ void Menu_PageShow(void)
         OLED_ShowString(2, 7, (HAL_GPIO_ReadPin(Laser_GPIO_Port, Laser_Pin) == 1) ?  "On " : "OFF");
         OLED_ShowString(3, 7, (HAL_GPIO_ReadPin(Beep_GPIO_Port, Beep_Pin) == 1) ?  "On " : "OFF");
         break;
-
-        case Page_set1:
-        OLED_ShowString(1, 10, (Current_Mode == Mode_Origin) ? "*" : "");
-        OLED_ShowString(2, 10, (Current_Mode == Mode_Square) ? "*" : "");
-        OLED_ShowString(3, 10, (Current_Mode == Mode_A4Paper) ? "*" : "");
-        OLED_ShowString(4, 10, (Current_Mode == Mode_Joystick) ? "*" : "");
-        break;
-
-        case Page_set2:
-
-        break;
-
-        case Page_Square:
-        for(uint8_t i = 0; i < 4; i ++)
-        {
-            if(sys_set.Calib_Point[i].x != 0 && sys_set.Calib_Point[i].x != 65535)
-            {
-                OLED_ShowNum(i + 1, 5, sys_set.Calib_Point[i].x, 4);
-            }
-            else
-            {
-                OLED_ShowString(i + 1, 6, "x");
-                OLED_ShowNum(i + 1, 7, i + 1, 1);
-            }
-            if(sys_set.Calib_Point[i].y != 0 && sys_set.Calib_Point[i].y != 65535)
-            {
-                OLED_ShowNum(i + 1, 10, sys_set.Calib_Point[i].y, 4);
-            }
-            else
-            {
-                OLED_ShowString(i + 1, 11, "y");
-                OLED_ShowNum(i + 1, 12, i + 1, 1);
-            }
-        }
-        break;
-        
-        case Page_Wait:
-        break;
-        
-        case Page_Disinit:
-        break;
-        
-        case Page_Error:
-        break;
         
     }
 }
@@ -233,13 +139,19 @@ void Key_Act1(void)//
     switch (menu.Page)
     {
         case Page_Main1:
-        if (sys_set.Flag.Init == 1) Menu_PageInit(Page_set1);
-        else Menu_PageInit(Page_Disinit);
-        break;
-
-        case Page_Main2:
-        if (sys_set.Flag.Init == 1) Menu_PageInit(Page_Disinit);
-        else Menu_PageInit(Page_Disinit);
+            if (motor_drive_set.Lock == Locked)
+            {
+                motor_drive_set.Lock = Unlocked;
+                motor_1L.Lock = Unlocked;
+                motor_2H.Lock = Unlocked;
+                sys_set.Flag.Arrive = 1;
+            }
+            else
+            {
+                motor_drive_set.Lock = Locked;
+                motor_1L.Lock = Locked;
+                motor_2H.Lock = Locked;
+            } 
         break;
 
         case Page_Main3:
@@ -277,84 +189,6 @@ void Key_Act1(void)//
             break;
         }
         break;
-
-        case Page_set1:
-        switch (menu.Cursor)
-        {
-            case 1:
-            Control_SetMode(Mode_Origin);
-            Menu_PageInit(Page_Main1);
-            break;
-
-            case 2:
-            Control_SetMode(Mode_Square);
-            Menu_PageInit(Page_Main1);
-            break;
-
-            case 3:
-            Control_SetMode(Mode_A4Paper);
-            Menu_PageInit(Page_Main1);
-            break;
-                
-            case 4:
-            Control_SetMode(Mode_Joystick);
-            Menu_PageInit(Page_Main1);
-            break;
-        }
-        //把到达情况置0
-        // sys_set.Flag.End = 0;
-        break;
-
-        case Page_set2:
-        switch (menu.Cursor)
-        {
-            case 1:
-
-            break;
-
-            case 2:
-
-            break;
-
-            case 3:
-
-            break;
-                
-            case 4:
-
-            break;
-        }
-        break;
-
-        case Page_Square:
-        //这里要改，改成等几秒钟
-        /************************************************************************************************************************* */
-        // for(uint8_t i = 0; i < 4; i ++)
-        // {
-        //     if (sys_set.Calib_Point[i].x == 0xff || sys_set.Calib_Point[i].x == 0) break;
-        //     sys_set.Calib_Point[menu.Cursor - 1] = Point_Queue_Dequeue(&(sys_set.Cam_Point));
-        // }
-        //还没改完，我先写直接调用了
-        sys_set.Calib_Point[menu.Cursor - 1] = laser.Now_Pix;
-        Coordinate_Init();
-        Menu_CursorMove(0);
-        break;
-        
-        case Page_Wait:
-        break;
-        
-        case Page_Disinit:
-        switch (menu.Cursor)
-        {
-            case 3:
-            Menu_PageInit(Page_Square);
-            break;
-                
-            case 4:
-            Menu_PageInit(Page_Main1);
-            break;
-        }
-        break;
         
         case Page_Error:
         Menu_PageInit(Page_Main1);
@@ -389,26 +223,6 @@ void Key_Act3(void)
         case Page_Main3:
         Menu_PageInit(Page_Main1);
         break;
-
-        case Page_set1:
-        Menu_PageInit(Page_set2);
-        break;
-
-        case Page_set2:
-        Menu_PageInit(Page_Square);
-        break;
-
-        case Page_Square:
-        Menu_PageInit(Page_set1);
-        break;
-        
-        case Page_Wait:
-
-        break;
-        
-        case Page_Disinit:
-        Menu_PageInit(Page_Square);
-        break;
         
         case Page_Error:
         Menu_PageInit(Page_Main1);
@@ -435,26 +249,6 @@ void Key_Act4(void)
         Menu_PageInit(Page_Main2);
         break;
 
-        case Page_set1:
-        Menu_PageInit(Page_Main1);
-        break;
-
-        case Page_set2:
-        Menu_PageInit(Page_Main1);
-        break;
-
-        case Page_Square:
-        Menu_PageInit(Page_Main1);
-        break;
-        
-        case Page_Wait:
-        Menu_PageInit(Page_Main1);
-        break;
-        
-        case Page_Disinit:
-        Menu_PageInit(Page_Main1);
-        break;
-        
         case Page_Error:
         Menu_PageInit(Page_Main1);
         break;

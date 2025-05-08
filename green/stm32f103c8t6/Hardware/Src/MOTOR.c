@@ -10,14 +10,14 @@
 Motor_Drive_Set motor_drive_set = {
     .Subdivide = 32,
     .Current = 1.44,
-    .Lock = Unlocked,
+    .Lock = Locked,
     //添加步距
 };
 //下电机使能锁定方向速度
 Motor_Config motor_1L = {
     .Number = 1,
     .En = ENABLE,
-    .Lock = Unlocked,
+    .Lock = Locked,
     .Dir = Stop,
     .Speed = 1,
     .Pin_Config = {
@@ -33,7 +33,7 @@ Motor_Config motor_1L = {
 Motor_Config motor_2H = {
     .Number = 2,
     .En = ENABLE,
-    .Lock = Unlocked,
+    .Lock = Locked,
     .Dir = Stop,
     .Speed = 1,
     .Pin_Config = {
@@ -50,6 +50,8 @@ void Motor_Init(void)
 {
     motor_1L.En = ENABLE;
     motor_2H.En = ENABLE;
+    motor_1L.Lock = Locked;
+    motor_2H.Lock = Locked;
     HAL_GPIO_WritePin(motor_1L.Pin_Config.En_Port, motor_1L.Pin_Config.En_Pin, (GPIO_PinState)motor_1L.En);
     HAL_GPIO_WritePin(motor_2H.Pin_Config.En_Port, motor_2H.Pin_Config.En_Pin, (GPIO_PinState)motor_2H.En);
 } 
