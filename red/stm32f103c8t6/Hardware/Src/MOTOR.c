@@ -121,10 +121,6 @@ uint8_t Motor_Dir_Set(Motor_Config* motor1, Motor_Config* motor2, mm_Point diede
         //到达！
         motor1->Dir = Stop;
         motor2->Dir = Stop;
-
-        //
-        // HAL_GPIO_WritePin(LED2_GPIO_Port,LED2_Pin,GPIO_PIN_SET);
-        //
         return 0;
     }
     HAL_GPIO_WritePin(LED2_GPIO_Port,LED2_Pin,GPIO_PIN_RESET);

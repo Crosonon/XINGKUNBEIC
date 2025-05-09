@@ -181,8 +181,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     //调取下一个点（如果刚设置模式，则此时arrive为1，会取刚刚入队的点）
     if (sys_set.Flag.Arrive == 1)
     {
-      //调用下一个点到set，如果65535则结束
-
       Pixel_Point point = Point_Queue_Dequeue(&(sys_set.Target_Point));
       if (point.x > 350 || point.x == 0 || point.y > 250 || point.y == 0)
       {
@@ -191,17 +189,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       else
       {
         laser.Set_Pix = point;
-        // CheckUpdate_Del();
         sys_set.Flag.Arrive = 0;
         Beep_Request(0.1);
       }
     }
-
     //检查set和now的更新，并以此更新del
     CheckUpdate_Del();
-
-    // 给两个电机设定方向，并检测是否到达,如果到达了会给两个电机置stop，下面不会动
-    //更新到达情况和方向,如果到了置1,没到置0
     sys_set.Flag.Arrive = !Motor_Dir_Set(&motor_1L, &motor_2H, laser.Del_mm);
     // 如果是摇杆模式，直接设定还没到达，并设定方向
     if(Current_Mode == Mode_Joystick)
