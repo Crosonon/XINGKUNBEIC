@@ -15,6 +15,7 @@ typedef enum
     Mode_Square,
     Mode_A4Paper,
     Mode_Joystick,
+    Mode_Track,
 }Control_Mode;
 
 //二维像素点uint16_t
