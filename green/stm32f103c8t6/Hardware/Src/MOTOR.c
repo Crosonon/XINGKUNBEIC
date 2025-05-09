@@ -118,7 +118,7 @@ uint8_t Motor_Update_Position(Motor_Config* motor, float* del, float step_dis)
 
 uint8_t Motor_Dir_Set(Motor_Config* motor1, Motor_Config* motor2, mm_Point diedel)
 {
-    if(fabs(diedel.x) <= 8 && fabs(diedel.y) <= 8)//如果距离小
+    if(absDis(diedel) < 25)//如果距离小
     {
         //到达！
         motor1->Dir = Stop;

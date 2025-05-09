@@ -79,6 +79,14 @@ void Menu_PageInit(Menu_Page Page)
         }
         Menu_CursorMove(1);
         break;
+
+        case Page_Square:
+        OLED_ShowString(1,1,"RU1:    ,    ");
+        OLED_ShowString(2,1,"LU2:    ,    ");
+        OLED_ShowString(3,1,"LD3:    ,    ");
+        OLED_ShowString(4,1,"RD4:    ,    ");
+        Menu_CursorMove(1);
+        break;
     }
 }
 
@@ -91,8 +99,9 @@ void Menu_PageShow(void)
         //以下为调试代码
         OLED_ShowNum(1,1,sys_set.Flag.Arrive,1);
         OLED_ShowString(2,1,(motor_drive_set.Lock == Locked) ? " Lock " : "Unlock");
-        OLED_ShowNum(3, 5, laser.Set_Pix.x, 4);
-        OLED_ShowNum(3, 10, laser.Set_Pix.y, 4);
+        OLED_ShowString(3, 1, "                  ");
+        OLED_ShowFloat(3, 1, laser.Del_mm.x);
+        OLED_ShowFloat(3, 8, laser.Del_mm.y);
         OLED_ShowString(4, 3, (motor_1L.Dir == Left) ? "Left" : (motor_1L.Dir == Right) ? "Righ" : " Mid");
         OLED_ShowString(4, 10, (motor_2H.Dir == Up) ? " Up " : (motor_2H.Dir == Down) ? "Down" : " Mid");
         
@@ -119,6 +128,29 @@ void Menu_PageShow(void)
         OLED_ShowString(3, 7, (HAL_GPIO_ReadPin(Beep_GPIO_Port, Beep_Pin) == 1) ?  "On " : "OFF");
         break;
         
+        case Page_Square:
+        for(uint8_t i = 0; i < 4; i ++)
+        {
+            if(sys_set.Calib_Point[i].x != 0 && sys_set.Calib_Point[i].x != 65535)
+            {
+                OLED_ShowNum(i + 1, 5, sys_set.Calib_Point[i].x, 4);
+            }
+            else
+            {
+                OLED_ShowString(i + 1, 6, "x");
+                OLED_ShowNum(i + 1, 7, i + 1, 1);
+            }
+            if(sys_set.Calib_Point[i].y != 0 && sys_set.Calib_Point[i].y != 65535)
+            {
+                OLED_ShowNum(i + 1, 10, sys_set.Calib_Point[i].y, 4);
+            }
+            else
+            {
+                OLED_ShowString(i + 1, 11, "y");
+                OLED_ShowNum(i + 1, 12, i + 1, 1);
+            }
+        }
+        break;
     }
 }
 
@@ -190,9 +222,17 @@ void Key_Act1(void)//
         }
         break;
         
+        case Page_Square:
+        sys_set.Calib_Point[menu.Cursor - 1] = laser.Now_Pix;
+        Coordinate_Init();
+        Menu_CursorMove(0);
+        break;
+
         case Page_Error:
         Menu_PageInit(Page_Main1);
         break;
+
+        
     }
 }
 /*
@@ -221,6 +261,10 @@ void Key_Act3(void)
         break;
 
         case Page_Main3:
+        Menu_PageInit(Page_Square);
+        break;
+
+        case Page_Square:
         Menu_PageInit(Page_Main1);
         break;
         
@@ -247,6 +291,10 @@ void Key_Act4(void)
 
         case Page_Main3:
         Menu_PageInit(Page_Main2);
+        break;
+
+        case Page_Square:
+        Menu_PageInit(Page_Main3);
         break;
 
         case Page_Error:

@@ -162,10 +162,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     else tim_i ++;
   }
 
-  //tim3，7ms，用于控制电机运动方向和走一步
+  //tim3，5ms，用于控制电机运动方向和走一步
   if (htim -> Instance == TIM3)
   {
-    //10ms
 
     if (motor_drive_set.Lock == Locked)
       return;
@@ -179,9 +178,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     if (sys_set.Flag.Arrive == 1)
       Beep_Request(0.1);
 
-    // //判断是否走，走一步,并更新电机的位置
-    Motor_Update_Position(&motor_1L, &laser.Del_mm.x, Motor_Step_Dis(motor_1L, laser) * 1.2);
-    Motor_Update_Position(&motor_2H, &laser.Del_mm.y, Motor_Step_Dis(motor_2H, laser) * 1.2);
+    Motor_Update_Position(&motor_1L, &laser.Del_mm.x, Motor_Step_Dis(motor_1L, laser));
+    Motor_Update_Position(&motor_2H, &laser.Del_mm.y, Motor_Step_Dis(motor_2H, laser));
   }
 
   if (htim -> Instance == TIM4)
@@ -252,14 +250,14 @@ int main(void)
 
     //用于无初始化的调试
     //{{290,20},{30,20},{23,216},{294,218}};
-    sys_set.Calib_Point[0].x = 259;
-    sys_set.Calib_Point[0].y = 40;
-    sys_set.Calib_Point[1].x = 71;
-    sys_set.Calib_Point[1].y = 34;
-    sys_set.Calib_Point[2].x = 62;
-    sys_set.Calib_Point[2].y = 224;
-    sys_set.Calib_Point[3].x = 261;
-    sys_set.Calib_Point[3].y = 228;
+    sys_set.Calib_Point[0].x = 299;
+    sys_set.Calib_Point[0].y = 10;
+    sys_set.Calib_Point[1].x = 78;
+    sys_set.Calib_Point[1].y = 11;
+    sys_set.Calib_Point[2].x = 80;
+    sys_set.Calib_Point[2].y = 225;
+    sys_set.Calib_Point[3].x = 295;
+    sys_set.Calib_Point[3].y = 226;
 
     Coordinate_Init();
 
