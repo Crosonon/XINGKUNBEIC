@@ -110,6 +110,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
           uart2_rx_state = 2;
           uart2_rx_mode = 0;
         }
+        else
+        {
+          uart2_rx_state = 0;
+        }
         break;
 
       case 2:  //接收数据体
@@ -131,10 +135,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
             Pixel_Point tem_point;
             tem_point.x = (uart2_rx_buffer[0]<<8) | (uart2_rx_buffer[1]);
             tem_point.y = (uart2_rx_buffer[2]<<8) | (uart2_rx_buffer[3]);
-
-            //识别的大部分是外,向原点方向移动矫正
-            tem_point.x += (tem_point.x < sys_set.origin_point.x ? 1 : -1) * 2;
-            tem_point.y += (tem_point.y < sys_set.origin_point.y ? 1 : -1) * 2;
 
             Point_Queue_Enqueue(&(sys_set.Cam_Point), tem_point);
             a4_num++;
