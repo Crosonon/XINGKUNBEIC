@@ -66,6 +66,7 @@ uint32_t Beep_time = 0;
 uint32_t Wait_time = 0;
 
 uint8_t a4_num = 0;
+extern Point_Queue Track_Point;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -119,8 +120,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
           uart2_rx_flag = 1;
           if (uart2_rx_mode == 0)//写入pixnow
           {
-            laser.Now_Pix.x = (uart2_rx_buffer[0]<<8) | (uart2_rx_buffer[1]);
-            laser.Now_Pix.y = (uart2_rx_buffer[2]<<8) | (uart2_rx_buffer[3]);
+            Pixel_Point temp;
+            temp.x = (uart2_rx_buffer[0]<<8) | (uart2_rx_buffer[1]);
+            temp.y = (uart2_rx_buffer[2]<<8) | (uart2_rx_buffer[3]);
+            if (temp.x > 350 || temp.x == 0 || temp.y > 250 || temp.y == 0);
+            else laser.Now_Pix = temp;
           }
           else if (uart2_rx_mode == 1)//a4
           {
@@ -174,37 +178,27 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim -> Instance == TIM3)
   {
     //10ms
-    //如果队列已经走完，则直接退出
-    // if(sys_set.Flag.End == 1)return;
-
-    
-
     //调取下一个点（如果刚设置模式，则此时arrive为1，会取刚刚入队的点）
     if (sys_set.Flag.Arrive == 1)
     {
       //调用下一个点到set，如果65535则结束
 
       Pixel_Point point = Point_Queue_Dequeue(&(sys_set.Target_Point));
-      if (point.x > 1000 || point.x == 0)
+      if (point.x > 350 || point.x == 0 || point.y > 250 || point.y == 0)
       {
-        sys_set.Flag.End = 1;
         Control_SetMode(Mode_Joystick);
       }
       else
       {
         laser.Set_Pix = point;
-        CheckUpdate_Del();
+        // CheckUpdate_Del();
         sys_set.Flag.Arrive = 0;
         Beep_Request(0.1);
       }
     }
 
     //检查set和now的更新，并以此更新del
-    // CheckUpdate_Del();
-    // Motor_Lock_Check();
-
-    // Segment seg;
-    // Segment_Init(&seg, laser.Now_Pix, laser.Set_Pix);
+    CheckUpdate_Del();
 
     // 给两个电机设定方向，并检测是否到达,如果到达了会给两个电机置stop，下面不会动
     //更新到达情况和方向,如果到了置1,没到置0
@@ -212,7 +206,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     // 如果是摇杆模式，直接设定还没到达，并设定方向
     if(Current_Mode == Mode_Joystick)
     {
-      // sys_set.Flag.Arrive = 0;
       motor_1L.Dir = Joy_Get_X();
       motor_2H.Dir = Joy_Get_Y();
       Motor_Move_Unit(motor_1L);
@@ -220,13 +213,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       return;
     }
 
-    // float n = TOTAL_STEP > abs(seg.dis - 5) ? abs(seg.dis - 5): TOTAL_STEP;
-    // OLED_ShowFloat(1, 3, n);
-    // for (int i = 1; i <= n * cos(seg.theta) * cos(seg.theta); ++i)
-    //   Motor_Move_Unit(motor_1L);
-    // for (int i = 1; i <= n * sin(seg.theta) * sin(seg.theta); ++i)
-    //   Motor_Move_Unit(motor_2H);
-    // //判断是否走，走一步,并更新电机的位置
     Motor_Update_Position(&motor_1L, &laser.Del_mm.x, Motor_Step_Dis(motor_1L, laser) * 1.2);
     Motor_Update_Position(&motor_2H, &laser.Del_mm.y, Motor_Step_Dis(motor_2H, laser) * 1.2);
   }
@@ -293,6 +279,7 @@ int main(void)
   HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
 
   Point_Queue_Init(&(sys_set.Cam_Point));
+  Point_Queue_Init(&(Track_Point));
 
 
     /*无传入的调试信息如下*/

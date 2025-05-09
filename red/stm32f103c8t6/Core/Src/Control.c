@@ -6,7 +6,9 @@
 
 Control_Mode Current_Mode = Mode_Joystick;
 uint8_t a4_data[3] = {  0xff, 0x00, 0xfe };
+Point_Queue Track_Point;
 
+float Speed_k = 1; 
 
 /*函数：
 设置模式：输入要设置的模式，返回设置成功或者失败
@@ -31,12 +33,14 @@ uint8_t Control_SetMode(Control_Mode Set_Mode)
         break;
     case Mode_Origin:
         HAL_TIM_Base_Stop_IT(&htim3);
-        htim3.Init.Period = 10000-1;
+        htim3.Init.Period = 10000/Speed_k-1;
         if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
         {
             Error_Handler();
         }
 
+        Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.origin_point);
+        Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.origin_point);
         Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.origin_point);
         Point_Queue_Enqueue(&(sys_set.Target_Point), sys_set.origin_point);
 
@@ -45,7 +49,7 @@ uint8_t Control_SetMode(Control_Mode Set_Mode)
         break;
     case Mode_Square:
         HAL_TIM_Base_Stop_IT(&htim3);
-        htim3.Init.Period = 10000-1;
+        htim3.Init.Period = 10000/Speed_k-1;
         if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
         {
             Error_Handler();
@@ -65,7 +69,7 @@ uint8_t Control_SetMode(Control_Mode Set_Mode)
 
     case Mode_A4Paper:
         HAL_TIM_Base_Stop_IT(&htim3);
-        htim3.Init.Period = 20000-1;
+        htim3.Init.Period = 20000/Speed_k-1;
         if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
         {
             Error_Handler();
@@ -102,7 +106,8 @@ uint8_t Control_SetMode(Control_Mode Set_Mode)
         if (sys_set.Target_Point.size != 4) return 0;
 
         Point_Queue_Enqueue(&(sys_set.Target_Point), Point_Queue_Peek(&(sys_set.Target_Point)));
-        Point_Queue_Lerp(&(sys_set.Target_Point), 9);
+        Point_Queue_Lerp(&(sys_set.Target_Point), 2);
+        Point_Queue_Double(&(sys_set.Target_Point));
 
         // sys_set.Flag.A4_Set = 0;
         sys_set.Flag.Arrive = 1;
@@ -111,6 +116,27 @@ uint8_t Control_SetMode(Control_Mode Set_Mode)
         break;
     case Mode_Joystick:
         /* code */
+        break;
+        
+    case Mode_Track:
+
+        HAL_TIM_Base_Stop_IT(&htim3);
+        htim3.Init.Period = 20000/Speed_k-1;
+        if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+        {
+            Error_Handler();
+        }
+
+        Pixel_Point tem_Point;
+        while (Track_Point.size)
+        {
+            tem_Point = Point_Queue_Dequeue(&Track_Point);
+            Point_Queue_Enqueue(&(sys_set.Target_Point), tem_Point);
+        }
+        Point_Queue_Double(&(sys_set.Target_Point));
+        
+        sys_set.Flag.Arrive = 1;
+        HAL_TIM_Base_Start_IT(&htim3);
         break;
     }
     sys_set.Flag.End = 0;

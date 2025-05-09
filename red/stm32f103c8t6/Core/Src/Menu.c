@@ -16,6 +16,8 @@ uint8_t main3tag = 0;//0队名1人名2学校时间
 
 extern float VoltCH2;
 extern uint32_t time;
+extern float Speed_k;
+extern Point_Queue Track_Point;
 
 void Menu_Init(void)
 {
@@ -45,10 +47,10 @@ void Menu_PageInit(Menu_Page Page)
     switch (Page)
     {
         case Page_Main1:
-        // OLED_ShowString(1, 1, "Laser Ctrl     ");
-        // OLED_ShowString(1, 12, (laser.Colour[0] == 'R') ? "Red" : "Gre");
-        // OLED_ShowString(2, 1, "Volt :");
-        // OLED_ShowString(3, 1, "Mode :");
+        OLED_ShowString(1, 1, "Laser Ctrl     ");
+        OLED_ShowString(1, 12, (laser.Colour[0] == 'R') ? "Red" : "Gre");
+        OLED_ShowString(2, 1, "Volt :");
+        OLED_ShowString(3, 1, "Mode :");
         // OLED_ShowString(4, 1, "Time :");
         menu.Cursor = 0;
         break;
@@ -62,8 +64,8 @@ void Menu_PageInit(Menu_Page Page)
         break;
 
         case Page_Main3:
-        OLED_ShowString(1, 1, "Motor:");
-        OLED_ShowString(2, 1, "Laser:");
+        OLED_ShowString(1, 1, "En   :");
+        OLED_ShowString(2, 1, "Lock :");
         OLED_ShowString(3, 1, "Beep :");
         switch (main3tag)
         {
@@ -89,7 +91,10 @@ void Menu_PageInit(Menu_Page Page)
         break;
 
         case Page_set2:
-        OLED_ShowString(1,1,"screen dis:");//没想好
+        OLED_ShowString(1,1,"Last:    ,");//6 11
+        OLED_ShowString(2,1,"Num :");
+        OLED_ShowString(3,1,"Move!");
+        OLED_ShowString(4,1,"Clear");
         Menu_CursorMove(1);
         break;
 
@@ -125,28 +130,13 @@ void Menu_PageShow(void)
     switch (menu.Page)
     {
         case Page_Main1:
-        // OLED_ShowString(1,7,(motor_drive_set.Lock == Locked) ? " Lock " : "Unlock");//这里要定义一个变量接收电机总开关的情况
-        // OLED_ShowFloat(2,7,VoltCH2);
-        // OLED_ShowString(3,7,(Current_Mode == Mode_Joystick) ? "Joystick" : 
-        //     (Current_Mode == Mode_Origin) ? "Origin" : 
-        //     (Current_Mode == Mode_Square) ? "Square" : 
-        //     (Current_Mode == Mode_A4Paper) ? "A4Paper" : "None");
+        OLED_ShowString(1,7,(motor_drive_set.Lock == Locked) ? " Lock " : "Unlock");//这里要定义一个变量接收电机总开关的情况
+        OLED_ShowFloat(2,7,VoltCH2);
+        OLED_ShowString(3,7,(Current_Mode == Mode_Joystick) ? "Joystick" : 
+            (Current_Mode == Mode_Origin) ? "Origin" : 
+            (Current_Mode == Mode_Square) ? "Square" : 
+            (Current_Mode == Mode_A4Paper) ? "A4Paper" : "Other");
         // OLED_ShowFloat(4, 7, 0);//计时还没写
-
-        //以下为调试代码
-        OLED_ShowNum(1,1,sys_set.Flag.Arrive,1);
-        OLED_ShowFloat(2,1,laser.Del_mm.x);
-        OLED_ShowFloat(2,9,laser.Del_mm.y);
-        OLED_ShowNum(3, 5, laser.Set_Pix.x, 4);
-        OLED_ShowNum(3, 10, laser.Set_Pix.y, 4);
-        OLED_ShowString(4, 3, (motor_1L.Dir == Left) ? "Left" : (motor_1L.Dir == Right) ? "Righ" : " Mid");
-        OLED_ShowString(4, 10, (motor_2H.Dir == Up) ? " Up " : (motor_2H.Dir == Down) ? "Down" : " Mid");
-
-        // OLED_ShowNum(3,1,sys_set.Flag.Init,1);
-        // OLED_ShowNum(3,3,sys_set.Flag.End,1);
-        // OLED_ShowNum(3,7,sys_set.Flag.A4_Set,1);
-        
-
         break;
 
         case Page_Main2:
@@ -165,8 +155,9 @@ void Menu_PageShow(void)
 
         case Page_Main3:
         OLED_ShowString(1, 7, (motor_1L.En == DISABLE) ? "Disable" : (motor_2H.En == DISABLE) ? "Disable" : "Enable");
-        OLED_ShowString(2, 7, (HAL_GPIO_ReadPin(Laser_GPIO_Port, Laser_Pin) == 1) ?  "On " : "OFF");
-        OLED_ShowString(3, 7, (HAL_GPIO_ReadPin(Beep_GPIO_Port, Beep_Pin) == 1) ?  "On " : "OFF");
+        OLED_ShowString(2, 7, (motor_drive_set.Lock == Locked) ?  "Locked" : "DisLock");
+        // OLED_ShowString(3, 7, (HAL_GPIO_ReadPin(Beep_GPIO_Port, Beep_Pin) == 1) ?  "On " : "OFF");
+        OLED_ShowFloat(3, 7, Speed_k);
         break;
 
         case Page_set1:
@@ -177,6 +168,7 @@ void Menu_PageShow(void)
         break;
 
         case Page_set2:
+        OLED_ShowNum(2, 6, Track_Point.size, 2);
 
         break;
 
@@ -261,14 +253,14 @@ void Key_Act1(void)//
             break;
 
             case 2:
-
-            HAL_GPIO_TogglePin(Laser_GPIO_Port, Laser_Pin);
+            motor_drive_set.Lock = (motor_drive_set.Lock == Locked) ? Unlocked : Locked;
+            motor_1L.Lock = motor_drive_set.Lock;
+            motor_2H.Lock = motor_drive_set.Lock;
             break;
 
             case 3:
-            // Control_SetMode(Mode_Square);
-            // Menu_PageInit(Page_Main);
-            //此处计时，给一个短促的beep
+            if(Speed_k != 0.5)Speed_k -= 0.1;
+            else Speed_k = 1.1;
             break;
                 
             case 4:
@@ -301,15 +293,15 @@ void Key_Act1(void)//
             Menu_PageInit(Page_Main1);
             break;
         }
-        //把到达情况置0
-        // sys_set.Flag.End = 0;
         break;
 
         case Page_set2:
         switch (menu.Cursor)
         {
             case 1:
-
+            Point_Queue_Enqueue(&Track_Point, laser.Now_Pix);
+            OLED_ShowNum(1, 6, laser.Now_Pix.x, 4);
+            OLED_ShowNum(1, 11, laser.Now_Pix.y, 4);
             break;
 
             case 2:
@@ -317,24 +309,18 @@ void Key_Act1(void)//
             break;
 
             case 3:
-
+            Control_SetMode(Mode_Track);
+            Menu_PageInit(Page_Main1);
             break;
                 
             case 4:
-
+            Point_Queue_Init(&Track_Point);
+            Menu_PageInit(Page_set2);
             break;
         }
         break;
 
         case Page_Square:
-        //这里要改，改成等几秒钟
-        /************************************************************************************************************************* */
-        // for(uint8_t i = 0; i < 4; i ++)
-        // {
-        //     if (sys_set.Calib_Point[i].x == 0xff || sys_set.Calib_Point[i].x == 0) break;
-        //     sys_set.Calib_Point[menu.Cursor - 1] = Point_Queue_Dequeue(&(sys_set.Cam_Point));
-        // }
-        //还没改完，我先写直接调用了
         sys_set.Calib_Point[menu.Cursor - 1] = laser.Now_Pix;
         Coordinate_Init();
         Menu_CursorMove(0);
@@ -423,8 +409,11 @@ void Key_Act4(void)
 {
     switch (menu.Page)
     {
+        //lock
         case Page_Main1:
-        if (sys_set.Flag.Init == 0) Menu_PageInit(Page_Disinit);
+        motor_drive_set.Lock = (motor_drive_set.Lock == Locked) ? Unlocked : Locked;
+        motor_1L.Lock = motor_drive_set.Lock;
+        motor_2H.Lock = motor_drive_set.Lock;
         break;
 
         case Page_Main2:
