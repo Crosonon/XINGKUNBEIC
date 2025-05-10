@@ -66,6 +66,8 @@ uint32_t Beep_time = 0;
 uint32_t Wait_time = 0;
 
 uint8_t a4_num = 0;
+
+uint8_t set_update = 0;//set pix更新标志位
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -131,6 +133,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
                 .y = (uart2_rx_buffer[2]<<8) | (uart2_rx_buffer[3])
               };
               laser.Set_Pix = point;
+              set_update = 1;
             }
           }
         } 
@@ -165,7 +168,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   //tim3，8ms，用于控制电机运动方向和走一步
   if (htim -> Instance == TIM3)
   {
-
     if (motor_drive_set.Lock == Locked)
       return;
 
@@ -175,9 +177,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     // 给两个电机设定方向，并检测是否到达,如果到达了会给两个电机置stop，下面不会动
     //更新到达情况和方向,如果到了置1,没到置0
     sys_set.Flag.Arrive = !Motor_Dir_Set(&motor_1L, &motor_2H, laser.Del_mm);
-    if (sys_set.Flag.Arrive == 1)
+    if (sys_set.Flag.Arrive == 1 && set_update) //只在有红色激光坐标发来时才响
+    {
       Beep_Request(0.1);
-
+      set_update = 0;
+    }
+      
     Motor_Update_Position(&motor_1L, &laser.Del_mm.x, Motor_Step_Dis(motor_1L, laser));
     Motor_Update_Position(&motor_2H, &laser.Del_mm.y, Motor_Step_Dis(motor_2H, laser));
   }
