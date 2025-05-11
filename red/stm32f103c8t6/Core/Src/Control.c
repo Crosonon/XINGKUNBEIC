@@ -128,9 +128,10 @@ uint8_t Control_SetMode(Control_Mode Set_Mode)
         }
 
         Pixel_Point tem_Point;
-        while (Track_Point.size)
+        for (int i = 0; i < Track_Point.size; ++i)
         {
             tem_Point = Point_Queue_Dequeue(&Track_Point);
+            Point_Queue_Enqueue(&(Track_Point), tem_Point); //不清空队列
             Point_Queue_Enqueue(&(sys_set.Target_Point), tem_Point);
         }
         Point_Queue_Double(&(sys_set.Target_Point));
