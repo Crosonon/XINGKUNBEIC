@@ -165,7 +165,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     else tim_i ++;
   }
 
-  //tim3，8ms，用于控制电机运动方向和走一步
+  //tim3，6ms，用于控制电机运动方向和走一步
   if (htim -> Instance == TIM3)
   {
     if (motor_drive_set.Lock == Locked)
